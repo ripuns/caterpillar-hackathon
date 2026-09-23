@@ -18,6 +18,7 @@ import { CostEstimationService } from './fleet/cost-estimation.service';
 import { TaskStatusService } from './tasks/task-status.service';
 import { IncidentsService } from './incidents/incidents.service';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { MlServiceHealthService } from './health/ml-service-health.service';
 
 @Module({
   imports: [HttpModule],
@@ -41,6 +42,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     CostEstimationService,
     TaskStatusService,
     IncidentsService,
+    MlServiceHealthService,
   ],
 })
 export class AppModule implements NestModule {
