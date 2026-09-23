@@ -12,7 +12,13 @@ before training so a bad dataset never silently reaches the model.
 import sys
 import pandas as pd
 
-from thresholds import IDLE_TIME_THRESHOLD_MIN, PROXIMITY_THRESHOLD_M
+from thresholds import (
+    IDLE_TIME_THRESHOLD_MIN,
+    PROXIMITY_THRESHOLD_M,
+    ZONES,
+    ZONE_DANGER_TIERS,
+    MACHINE_SCORE_WEIGHTS,
+)
 
 errors = []
 warnings = []
@@ -28,6 +34,7 @@ def validate_operations(df):
         "timestamp", "machine_id", "operator_id", "engine_hours", "fuel_used_l",
         "load_cycles", "idling_time_min", "seatbelt_status",
         "distance_to_nearest_object_m", "safety_alert_triggered", "training_completed_recent",
+        "current_zone",
     ]
     check(list(df.columns) == required_cols, f"operations.csv columns mismatch: {list(df.columns)}")
 
@@ -40,6 +47,7 @@ def validate_operations(df):
     check(set(df["seatbelt_status"].unique()) <= {"Fastened", "Unfastened"}, "invalid seatbelt_status values")
     check(set(df["safety_alert_triggered"].unique()) <= {"Yes", "No"}, "invalid safety_alert_triggered values")
     check(set(df["training_completed_recent"].unique()) <= {"Yes", "No"}, "invalid training_completed_recent values")
+    check(set(df["current_zone"].unique()) <= set(ZONES), "invalid current_zone values")
     check(df["operator_id"].str.match(r"^OP-\d{2}$").all(), "malformed operator_id")
     check(df["machine_id"].str.match(r"^M-\d{2}$").all(), "malformed machine_id")
 
@@ -79,6 +87,14 @@ def validate_tasks(df):
     check(row_count_ok, f"tasks.csv row count {len(df)} outside expected 150-400 range", is_error=False)
 
 
+def validate_config():
+    """Static config checks - not dataset-dependent, but same fail-fast discipline."""
+    check(set(ZONE_DANGER_TIERS.keys()) == set(ZONES),
+          "ZONE_DANGER_TIERS keys don't match ZONES exactly")
+    check(sum(MACHINE_SCORE_WEIGHTS.values()) == 100,
+          f"MACHINE_SCORE_WEIGHTS sums to {sum(MACHINE_SCORE_WEIGHTS.values())}, not 100")
+
+
 def cross_file_check(ops_df, tasks_df):
     ops_operators = set(ops_df["operator_id"].unique())
     task_operators = set(tasks_df["operator_id"].unique())
@@ -93,6 +109,7 @@ def main():
     validate_operations(ops_df)
     validate_tasks(tasks_df)
     cross_file_check(ops_df, tasks_df)
+    validate_config()
 
     print(f"operations.csv: {len(ops_df)} rows validated")
     print(f"tasks.csv:      {len(tasks_df)} rows validated")

@@ -1,0 +1,82 @@
+[
+  {
+    "machineId": "M-01",
+    "currentZone": "Restricted Zone",
+    "zoneDangerTier": "high",
+    "machineHealthScore": 68,
+    "sosActive": false,
+    "sosReason": null
+  },
+  {
+    "machineId": "M-02",
+    "currentZone": "Restricted Zone",
+    "zoneDangerTier": "high",
+    "machineHealthScore": 72,
+    "sosActive": false,
+    "sosReason": null
+  },
+  {
+    "machineId": "M-03",
+    "currentZone": "Maintenance Bay",
+    "zoneDangerTier": "low",
+    "machineHealthScore": 56,
+    "sosActive": false,
+    "sosReason": null
+  },
+  {
+    "machineId": "M-04",
+    "currentZone": "Maintenance Bay",
+    "zoneDangerTier": "low",
+    "machineHealthScore": 76,
+    "sosActive": false,
+    "sosReason": null
+  },
+  {
+    "machineId": "M-05",
+    "currentZone": "Maintenance Bay",
+    "zoneDangerTier": "low",
+    "machineHealthScore": 64,
+    "sosActive": false,
+    "sosReason": null
+  },
+  {
+    "machineId": "M-06",
+    "currentZone": "Restricted Zone",
+    "zoneDangerTier": "high",
+    "machineHealthScore": 70,
+    "sosActive": false,
+    "sosReason": null
+  },
+  {
+    "machineId": "M-07",
+    "currentZone": "Restricted Zone",
+    "zoneDangerTier": "high",
+    "machineHealthScore": 73,
+    "sosActive": false,
+    "sosReason": null
+  },
+  {
+    "machineId": "M-08",
+    "currentZone": "Maintenance Bay",
+    "zoneDangerTier": "low",
+    "machineHealthScore": 77,
+    "sosActive": false,
+    "sosReason": null
+  },
+  {
+    "machineId": "M-09",
+    "currentZone": "Idle Yard",
+    "zoneDangerTier": "low",
+    "machineHealthScore": 69,
+    "sosActive": false,
+    "sosReason": null
+  },
+  {
+    "machineId": "M-10",
+    "currentZone": "Restricted Zone",
+    "zoneDangerTier": "high",
+    "machineHealthScore": 69,
+    "sosActive": false,
+    "sosReason": null
+  }
+]

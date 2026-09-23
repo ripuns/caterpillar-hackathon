@@ -47,3 +47,39 @@ SCORE_WEIGHTS = {
     "machine_use_behavior": 20,  # idling behavior
     "training_status": 10,     # training_completed_recent
 }
+
+# --- Machine Health Score (README §7.4 / CONTRACTS.md §11) ---
+# Same weighted, explainable, 0-100 + status-band pattern as the Operator
+# Score above, but grouped by machine_id and sourced entirely from
+# operations.csv (no tasks.csv - a machine has no "task performance").
+# SCORE_STATUS_BANDS above is reused unchanged for machine status.
+MACHINE_SCORE_WEIGHTS = {
+    "wearUsageLoad": 25,           # engine_hours + load_cycles utilization
+    "fuelEfficiencyDrift": 20,     # fuel_used_l per load_cycle vs. this machine's own baseline
+    "idlingBurden": 15,            # idling_time_min, machine-grouped (reuses operator idling formula)
+    "incidentAssociation": 30,     # safety-alert rate + proximity-hazard rate, this machine
+    "serviceIntervalProximity": 10,  # engine_hours vs. SERVICE_INTERVAL_HOURS_THRESHOLD
+}
+
+# HACKATHON SIMULATION CONSTANT ONLY - this is not an official Caterpillar
+# service interval. Treated as a recurring interval (engine_hours % this)
+# purely to give the demo a deterministic "approaching service" signal.
+SERVICE_INTERVAL_HOURS_THRESHOLD = 500.0
+
+# --- Zone tracking + compound SOS (README §7.5 / CONTRACTS.md §13) ---
+# Fixed zone set and static zone -> danger-tier config, per the locked
+# decision. Not per-row generated data - a small config lookup table.
+ZONES = ["Active Work Zone", "Maintenance Bay", "Restricted Zone", "Idle Yard"]
+
+ZONE_DANGER_TIERS = {
+    "Restricted Zone": "high",
+    "Active Work Zone": "medium",
+    "Maintenance Bay": "low",
+    "Idle Yard": "low",
+}
+
+# Compound SOS trigger threshold: CRITICAL band ceiling from SCORE_STATUS_BANDS.
+# Kept as an explicit constant here (rather than re-deriving it) so the
+# condition in zone_status.py reads directly against a named threshold,
+# same discipline as every other rule in this file.
+MACHINE_CRITICAL_SCORE_THRESHOLD = 40

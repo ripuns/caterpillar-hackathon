@@ -363,7 +363,11 @@ FastAPI side not yet given the equivalent handler (currently returns default Fas
 
 File format: **CSV**, one file per dataset, `snake_case` column headers (converted to `camelCase` at the NestJS API boundary — see field mappings below). Dev generates both files by end of step 1 (0:30–1:15) and commits them to the `data` branch immediately, polished or not.
 
+**⚠️ This section documents the schema as originally planned. The actual current files have drifted from it — see the real header rows and notes below each table, which reflect what's genuinely in `data-ml/data/*.csv` right now.**
+
 ### A. `operations.csv` — Operational/Safety Dataset
+
+**Actual current header:** `timestamp,machine_id,operator_id,engine_hours,fuel_used_l,load_cycles,idling_time_min,seatbelt_status,distance_to_nearest_object_m,safety_alert_triggered,training_completed_recent,current_zone` (424 rows including header, 423 data rows)
 
 | Column (CSV header) | Type | Valid values / range | Notes |
 |---|---|---|---|
@@ -377,18 +381,24 @@ File format: **CSV**, one file per dataset, `snake_case` column headers (convert
 | `seatbelt_status` | string | `Fastened` \| `Unfastened` | |
 | `distance_to_nearest_object_m` | float | `0.5`–`20.0` | |
 | `safety_alert_triggered` | string | `Yes` \| `No` | ground-truth label, generator sets `Yes` when `seatbelt_status = Unfastened` OR `distance_to_nearest_object_m < 3` OR `idling_time_min > 45` (mirrors the rules in §3 below — dataset and rule engine must agree) |
+| `training_completed_recent` | string | `Yes` \| `No` | **added post-lock**, feeds the Operator Performance Score's training-status component (see `data-ml/BACKEND_HANDOFF.md` §2) |
+| `current_zone` | string | `Active Work Zone` \| `Maintenance Bay` \| `Restricted Zone` \| `Idle Yard` | **added post-lock** for §13's zone/SOS feature — uniform-random per session, no archetype correlation. Danger tiers: Restricted=high, Active Work=medium, Maintenance Bay/Idle Yard=low (`thresholds.py`'s `ZONE_DANGER_TIERS`) |
 
-**Row count:** 150–200 rows, one row = one machine-session. Generate multiple sessions per `machine_id`/`operator_id` pair across different timestamps so the dashboard has a believable history.
+**Row count:** 423 data rows (originally spec'd 150–200; actual generator produces more, ~20-35 sessions per operator × 15 operators — not a problem, just larger than the original minimum).
 
 **API boundary mapping** (CSV `snake_case` → JSON `camelCase`, done in NestJS's data-loading layer, not in the CSV itself):
 `machine_id`→`machineId`, `operator_id`→`operatorId`, `idling_time_min`→ used to compute `/behavior-flags` `value`, `seatbelt_status`/`distance_to_nearest_object_m` → used to compute `/safety-alerts` entries. Ripun's rule engine reads this CSV directly — it is not re-exposed as a raw passthrough endpoint.
 
 ### B. `tasks.csv` — Task Time Estimation Dataset
 
+**Actual current header:** `task_id,machine_id,operator_id,timestamp,task_type,weather,operator_skill,machine_age_yrs,estimated_time_min,actual_time_min` (249 rows including header, 248 data rows)
+
 | Column (CSV header) | Type | Valid values / range | Notes |
 |---|---|---|---|
 | `task_id` | string | `T001`, `T002`, … | sequential |
+| `machine_id` | string | `M-01` … `M-10` | **added post-lock by Ripun** (not in Dev's original generator) — required for §1's `/tasks` response shape. No real operator-machine affinity exists in `operations.csv` to preserve, so assigned via seeded deterministic randomization, applied identically to this file on both `backend` and `data` branches to avoid drift |
 | `operator_id` | string | `OP-01` … `OP-15` | **added for §7.3 cross-feature synthesis** — must use the same ID space as `operations.csv`'s `operator_id` so the two datasets can be joined per operator |
+| `timestamp` | ISO 8601 string | e.g. `2026-09-24T09:00:00Z` | **added post-lock by Dev** for the cross-feature join (per-operator task-time history needs a timestamp) |
 | `task_type` | string | `Earth Excavation` \| `Trenching` \| `Material Loading` \| `Grading` \| `Demolition` | fixed set, matches provided sample — do not invent new task types |
 | `weather` | string | `Sunny` \| `Rainy` \| `Cloudy` \| `Windy` | fixed set, matches provided sample |
 | `operator_skill` | string | `Beginner` \| `Intermediate` \| `Expert` | |
@@ -396,7 +406,7 @@ File format: **CSV**, one file per dataset, `snake_case` column headers (convert
 | `estimated_time_min` | int | `15`–`120` | |
 | `actual_time_min` | int | derived, see generation rule below | **this is the regression target**, not `estimated_time_min` |
 
-**Row count:** 80–120 rows.
+**Row count:** 248 data rows (originally spec'd 80–120; actual generator produces more, ~10-20 tasks per operator × 15 operators).
 
 **Generation rule for `actual_time_min`** (so the dataset preserves the real signal from the provided sample rather than being random noise): start from `estimated_time_min`, then apply a multiplier:
 - `operator_skill = Beginner` → ×1.15–1.40
@@ -418,6 +428,13 @@ This keeps the synthetic data consistent with the 5 provided sample rows (Dev sh
 
 These three numbers must be identical in: Dev's dataset-generation logic (label consistency), Ripun's NestJS rule engine (`/safety-alerts`, `/behavior-flags`), and any documentation shown to the panel. If one of you needs to change a threshold, update it here first and flag the other two — do not tune it silently in code only.
 
+### Additional Thresholds (Machine Health / Zone-SOS, added post-lock — see `data-ml/thresholds.py`)
+- `SERVICE_INTERVAL_HOURS_THRESHOLD = 500.0` — simulated service interval for §11's `serviceIntervalProximity` component. **Explicitly not an official Caterpillar interval** — state this plainly if asked by the panel.
+- `MACHINE_CRITICAL_SCORE_THRESHOLD = 40` — same as the shared `SCORE_STATUS_BANDS` CRITICAL ceiling, used as the SOS trigger's health-score condition (§13).
+- `MACHINE_SCORE_WEIGHTS`: `wearUsageLoad` 25, `fuelEfficiencyDrift` 20, `idlingBurden` 15, `incidentAssociation` 30, `serviceIntervalProximity` 10 (sums to 100).
+- `ZONE_DANGER_TIERS`: `Restricted Zone`→high, `Active Work Zone`→medium, `Maintenance Bay`→low, `Idle Yard`→low.
+- **SOS condition (exact):** `machineHealthScore < 40 AND zoneDangerTier == "high"`. See §13's known gap note — no machine currently meets this in the generated dataset.
+
 ---
 
 ## Change Log
@@ -437,3 +454,4 @@ Record any change made after the Hour 0:30 lock, so nobody works against a stale
 | — | `GET /fleet/cost-summary` (§14) implemented and verified against real data. `topRiskMachines`/`machinesNearingServiceInterval` return `[]` pending Machine Health Score — not fabricated. Fixed cost constants documented in `cost-estimation.service.ts` and §14. | Ripun |
 | — | Production hardening batch: implemented and verified §8.1 (validation), §8.3 (standard error shape), §8.6 (request-level logging), §8.8 (idempotency); §8.5 (circuit breaker) partial — `/health` exists but not yet consulted by `/predict-task-time`. Implemented `PATCH /tasks/:taskId` (§6, in-memory status overlay), `POST`/`GET /incidents` (§7/§8, includes live backfill of system incidents from safety alerts). Done now (before Anamika starts frontend integration) specifically so the API surface is stable when she begins wiring, rather than risking a contract change mid-integration. | Ripun |
 | — | **Completed remaining §8 items**, all verified: §8.2 pagination (`?page&pageSize` on all 4 list endpoints), §8.4 caching (30s TTL on `/operators/:id/summary`), §8.5 circuit breaker now fully wired (`MlServiceHealthService`, background-refreshed reachability, `PredictionController` skips the live call when down), §8.6's decision-level half (rule-firing + prediction audit logs, not just request logs), §8.7 auth (`x-api-key` guard on both write endpoints), §8.9 versioning (`/api/v1/` global prefix — **breaking change, every path now requires the prefix**). §8 is now fully implemented. | Ripun |
+| — | Merged Dev's `machine_scoring.py` + `zone_status.py` (data branch) into `backend`. Real Machine Health Score and zone/SOS computation now exist in `data-ml/`, documented in `data-ml/MACHINE_HEALTH_HANDOFF.md` (more detailed/authoritative than §11/§13 below — read that first). `current_zone` added to `operations.csv`. §11/§13 updated to match Dev's real component formulas and response shape. **Known gap, deliberately deferred, not fixed here:** no machine in the current dataset scores below the CRITICAL threshold (lowest is 56), so `sosActive` is `false` for all machines out of the box — confirmed as a data-realism outcome, not a logic bug, via Dev's synthetic worst-case test. Revisit before demo if a live SOS trigger needs to be shown — fix is contained to `data-ml/generate_data.py` (bias one machine's synthetic values), no backend/frontend changes required. | Ripun, after merging Dev's work |

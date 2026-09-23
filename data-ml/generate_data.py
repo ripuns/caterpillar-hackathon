@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 
-from thresholds import IDLE_TIME_THRESHOLD_MIN, PROXIMITY_THRESHOLD_M
+from thresholds import IDLE_TIME_THRESHOLD_MIN, PROXIMITY_THRESHOLD_M, ZONES
 
 SEED = 42
 rng = np.random.default_rng(SEED)
@@ -126,7 +126,8 @@ def gen_operations():
                 "seatbelt_status": seatbelt,
                 "distance_to_nearest_object_m": distance,
                 "safety_alert_triggered": safety_alert,
-                "training_completed_recent": OPERATOR_TRAINING[op],
+                "training_completed_recent": OPERATOR_TRAINING[op], 
+                "current_zone": ZONES[len(rows) % len(ZONES)],
             })
     df = pd.DataFrame(rows).sort_values("timestamp").reset_index(drop=True)
     return df
@@ -203,3 +204,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

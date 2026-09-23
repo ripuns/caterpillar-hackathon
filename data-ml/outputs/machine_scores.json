@@ -1,0 +1,222 @@
+[
+  {
+    "machineId": "M-01",
+    "score": 68,
+    "status": "GOOD",
+    "componentScores": {
+      "wearUsageLoad": 10.0,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 9.0,
+      "incidentAssociation": 19.2,
+      "serviceIntervalProximity": 9.7
+    },
+    "contributingFactors": [
+      "engine hours 3515 (70% of 5000h schema ceiling)",
+      "mean load cycles 49.8 per session (50% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (0.44 vs 0.91 L/cycle over 44 prior session(s))",
+      "excessive idling in 12 of 45 session(s) on this machine",
+      "3 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 16 of 45 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 485 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 45
+  },
+  {
+    "machineId": "M-02",
+    "score": 72,
+    "status": "GOOD",
+    "componentScores": {
+      "wearUsageLoad": 17.8,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 10.3,
+      "incidentAssociation": 21.2,
+      "serviceIntervalProximity": 2.3
+    },
+    "contributingFactors": [
+      "engine hours 384 (8% of 5000h schema ceiling)",
+      "mean load cycles 50.2 per session (50% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (0.16 vs 1.16 L/cycle over 57 prior session(s))",
+      "excessive idling in 12 of 58 session(s) on this machine",
+      "3 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 17 of 58 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 116 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 58
+  },
+  {
+    "machineId": "M-03",
+    "score": 56,
+    "status": "NEEDS_ATTENTION",
+    "componentScores": {
+      "wearUsageLoad": 13.5,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 6.2,
+      "incidentAssociation": 15.3,
+      "serviceIntervalProximity": 0.8
+    },
+    "contributingFactors": [
+      "engine hours 1962 (39% of 5000h schema ceiling)",
+      "mean load cycles 52.4 per session (52% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (0.50 vs 0.84 L/cycle over 35 prior session(s))",
+      "excessive idling in 14 of 36 session(s) on this machine",
+      "4 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 17 of 36 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 38 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 36
+  },
+  {
+    "machineId": "M-04",
+    "score": 76,
+    "status": "GOOD",
+    "componentScores": {
+      "wearUsageLoad": 15.0,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 12.3,
+      "incidentAssociation": 22.9,
+      "serviceIntervalProximity": 5.5
+    },
+    "contributingFactors": [
+      "engine hours 1724 (34% of 5000h schema ceiling)",
+      "mean load cycles 45.6 per session (46% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (0.54 vs 1.00 L/cycle over 39 prior session(s))",
+      "excessive idling in 5 of 42 session(s) on this machine",
+      "3 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 9 of 42 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 276 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 42
+  },
+  {
+    "machineId": "M-05",
+    "score": 64,
+    "status": "NEEDS_ATTENTION",
+    "componentScores": {
+      "wearUsageLoad": 14.0,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 8.9,
+      "incidentAssociation": 16.9,
+      "serviceIntervalProximity": 4.6
+    },
+    "contributingFactors": [
+      "engine hours 1769 (35% of 5000h schema ceiling)",
+      "mean load cycles 52.7 per session (53% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (0.10 vs 1.21 L/cycle over 35 prior session(s))",
+      "excessive idling in 10 of 37 session(s) on this machine",
+      "3 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 16 of 37 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 231 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 37
+  },
+  {
+    "machineId": "M-06",
+    "score": 70,
+    "status": "GOOD",
+    "componentScores": {
+      "wearUsageLoad": 8.3,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 12.6,
+      "incidentAssociation": 24.3,
+      "serviceIntervalProximity": 4.8
+    },
+    "contributingFactors": [
+      "engine hours 4261 (85% of 5000h schema ceiling)",
+      "mean load cycles 48.8 per session (49% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (1.24 vs 1.68 L/cycle over 45 prior session(s))",
+      "excessive idling in 5 of 47 session(s) on this machine",
+      "3 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 8 of 47 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 239 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 47
+  },
+  {
+    "machineId": "M-07",
+    "score": 73,
+    "status": "GOOD",
+    "componentScores": {
+      "wearUsageLoad": 11.5,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 12.0,
+      "incidentAssociation": 21.5,
+      "serviceIntervalProximity": 8.1
+    },
+    "contributingFactors": [
+      "engine hours 3096 (62% of 5000h schema ceiling)",
+      "mean load cycles 46.4 per session (46% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (0.09 vs 1.04 L/cycle over 36 prior session(s))",
+      "excessive idling in 5 of 38 session(s) on this machine",
+      "3 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 10 of 38 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 404 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 38
+  },
+  {
+    "machineId": "M-08",
+    "score": 77,
+    "status": "GOOD",
+    "componentScores": {
+      "wearUsageLoad": 18.9,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 9.9,
+      "incidentAssociation": 21.6,
+      "serviceIntervalProximity": 6.9
+    },
+    "contributingFactors": [
+      "engine hours 156 (3% of 5000h schema ceiling)",
+      "mean load cycles 45.6 per session (46% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (0.08 vs 1.08 L/cycle over 47 prior session(s))",
+      "excessive idling in 11 of 49 session(s) on this machine",
+      "2 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 14 of 49 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 344 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 49
+  },
+  {
+    "machineId": "M-09",
+    "score": 69,
+    "status": "GOOD",
+    "componentScores": {
+      "wearUsageLoad": 8.5,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 13.0,
+      "incidentAssociation": 25.0,
+      "serviceIntervalProximity": 2.9
+    },
+    "contributingFactors": [
+      "engine hours 4354 (87% of 5000h schema ceiling)",
+      "mean load cycles 44.7 per session (45% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (0.51 vs 1.52 L/cycle over 33 prior session(s))",
+      "excessive idling in 3 of 34 session(s) on this machine",
+      "2 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 5 of 34 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 146 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 34
+  },
+  {
+    "machineId": "M-10",
+    "score": 69,
+    "status": "GOOD",
+    "componentScores": {
+      "wearUsageLoad": 15.5,
+      "fuelEfficiencyDrift": 20.0,
+      "idlingBurden": 9.5,
+      "incidentAssociation": 21.5,
+      "serviceIntervalProximity": 2.5
+    },
+    "contributingFactors": [
+      "engine hours 873 (17% of 5000h schema ceiling)",
+      "mean load cycles 58.5 per session (58% of 100-cycle ceiling)",
+      "fuel use at or below this machine's own baseline (0.06 vs 0.81 L/cycle over 35 prior session(s))",
+      "excessive idling in 9 of 37 session(s) on this machine",
+      "1 proximity incident(s) recorded on this machine (below 3.0m)",
+      "safety alerts triggered on 11 of 37 session(s) on this machine",
+      "approaching simulated 500-hour service interval (est. 127 engine hours remaining; not an official Caterpillar interval)"
+    ],
+    "sessionsAnalyzed": 37
+  }
+]
