@@ -152,6 +152,8 @@ Response:
 
 ## 6. `PATCH /tasks/:taskId` — Update Task Status (§8, Production Hardening)
 
+**Implemented and verified.** Status is tracked in an in-memory overlay (`backend/src/tasks/task-status.service.ts`) since `tasks.csv` has no status column and is treated as read-only source data — a task's status defaults to `"pending"` until changed, and persists across requests for the process lifetime (not written back to the CSV, no database in this build).
+
 Request:
 ```json
 { "status": "in_progress" }
@@ -160,11 +162,13 @@ Request:
 
 Response: the updated task object (same shape as §1's list items).
 
-Errors: `404` if `taskId` doesn't exist (see §8.3 error shape), `400` if `status` isn't a valid value.
+Errors: `404` if `taskId` doesn't exist, `400` if `status` isn't a valid value or the body contains unknown fields (global validation rejects both — see §8.1/§8.3).
 
 ---
 
 ## 7. `POST /incidents` — Manual Incident Logging (§8, Production Hardening)
+
+**Implemented and verified**, including idempotency (§8.8) — an optional `requestId` field, if reused, returns the original incident rather than creating a duplicate.
 
 Directly addresses the problem statement's "incident logging" outcome — currently only system-generated alerts exist (§2); this lets an operator/coordinator log something manually (e.g. a near-miss the sensors didn't catch).
 
@@ -194,7 +198,7 @@ Response:
 
 ## 8. `GET /incidents` — List Incidents
 
-Response: array of the incident objects from §7 (both `loggedBy` values), newest first. Supports pagination — see §8.2.
+**Implemented and verified.** Response: array of the incident objects from §7 (both `loggedBy` values), newest first. Manual incidents come from the in-memory store; `loggedBy: "system"` entries are backfilled live from the rule engine's computed safety alerts (§2), so this endpoint always reflects current alert state without needing separate persistence. Pagination not yet added — see §8.2.
 
 ## 9. `GET /operators/:operatorId/summary` — Per-Operator Rollup (Supports §7.3)
 
@@ -225,11 +229,13 @@ NestJS computes this by filtering the in-memory `operations.csv`/`tasks.csv` (lo
 
 ## 10. `GET /health` — Service Health Check (Both NestJS and FastAPI)
 
+**Implemented on NestJS side and verified** (`backend/src/health/health.controller.ts`). FastAPI's own `/health` already existed from `ml-service/main.py`'s Step 3 build.
+
 Response:
 ```json
 { "status": "ok", "uptime": 3421, "pythonServiceReachable": true }
 ```
-NestJS's `/health` should itself check FastAPI's health (a short-timeout ping) and report `pythonServiceReachable` — this is what §8's circuit-breaker logic (below) uses to decide whether to call the model or go straight to fallback, instead of waiting for every request to time out individually.
+NestJS's `/health` pings FastAPI's `/health` with a 1-second timeout and reports `pythonServiceReachable`. **Not yet wired as an actual circuit breaker** — `/predict-task-time` still attempts the real call every time (with its own 2s timeout + fallback, per §4), rather than checking this cached signal first to skip straight to fallback. §8.5's circuit-breaker optimization is still open.
 
 ## 11. `GET /machines/:machineId/health` — Machine Health Score (Supports §7.4)
 
@@ -314,39 +320,42 @@ Response (real example, from the actual synthetic dataset):
 
 Everything below is explicitly **not required for the first review**. It exists to take this from "working demo" toward "something that could plausibly run for real," which is the more ambitious bar the team is now building toward. Build only after the core 5 outcomes and the §7 differentiator features are solid.
 
-### 8.1 Input Validation
-- Every `POST`/`PATCH` body validated against its schema (NestJS: `class-validator` DTOs; FastAPI: Pydantic models — already idiomatic there). Reject malformed requests with `400` before they reach business logic, not after.
-- Reject unknown enum values explicitly (e.g. `weather: "Foggy"` should `400`, not silently fall through to an undefined rule branch).
+### 8.1 Input Validation — ✅ Implemented and verified
+- NestJS: `class-validator` DTOs (`CreateIncidentDto`, `UpdateTaskStatusDto`) + a global `ValidationPipe` (`whitelist: true, forbidNonWhitelisted: true, transform: true`) in `main.ts` — rejects malformed bodies and unknown fields with `400` before they reach business logic. Verified: invalid enum values and extra fields both correctly rejected.
+- FastAPI: Pydantic models already in place since Step 3 (`PredictTaskTimeRequest`).
 
-### 8.2 Pagination
+### 8.2 Pagination — not yet implemented
 - `GET /tasks`, `GET /safety-alerts`, `GET /behavior-flags`, `GET /incidents` accept `?page=1&pageSize=20` query params. Response wraps the array: `{ "data": [...], "page": 1, "pageSize": 20, "total": 147 }`. Prevents a growing dataset from dumping hundreds of rows into one response as the demo data grows during §7.3 work.
 
-### 8.3 Standard Error Shape
-All error responses, across both NestJS and FastAPI, use the same JSON shape so the frontend has one error-handling path:
+### 8.3 Standard Error Shape — ✅ Implemented and verified
+Global exception filter (`backend/src/common/filters/http-exception.filter.ts`), registered in `main.ts`. All error responses, across NestJS, use:
 ```json
-{ "error": { "code": "TASK_NOT_FOUND", "message": "Task T999 does not exist", "statusCode": 404 } }
+{ "error": { "code": "NOT_FOUND", "message": "Task T999 does not exist", "statusCode": 404 } }
 ```
+FastAPI side not yet given the equivalent handler (currently returns default FastAPI/Pydantic error shapes) — low priority since `/predict-task-time` never actually errors out to the client (always falls back instead, per §4).
 
-### 8.4 Caching for Expensive Reads
+### 8.4 Caching for Expensive Reads — not yet implemented
 - `GET /operators/:operatorId/summary` (§9) recomputes a join across both datasets — cache it in-memory (a simple `Map` with a short TTL, e.g. 30s) rather than recomputing per request. Not a real production cache, but demonstrates awareness of the cost.
 
-### 8.5 Circuit Breaker for the Python Service
-- Use `GET /health`'s `pythonServiceReachable` (§10) to short-circuit: if the last health check failed, skip the network call entirely and go straight to fallback (§4's `fallback_average` / §4.1's `fallback_unavailable`) instead of waiting out a timeout on every prediction request. Simple in-memory flag, refreshed every ~10s, is enough — no need for a real library.
+### 8.5 Circuit Breaker for the Python Service — partially implemented
+`GET /health` (§10) exists and correctly reports `pythonServiceReachable`, but `/predict-task-time` doesn't consult it yet — it still attempts the live call every time (own 2s timeout + fallback). Wiring the health signal in as an actual short-circuit is still open.
 
-### 8.6 Structured Logging
-- Every request logged with: timestamp, method, path, status code, duration — plain `console.log`/Python `logging` is fine, but keep the format consistent so panel Q&A about "how would you debug this in production" has a real answer.
-- Log every rule-engine trigger (which rule fired, on what data) and every ML prediction (input + output) — this becomes your audit trail, which directly supports the "explainable, not black-box" narrative (§2) with actual evidence, not just a claim.
+### 8.6 Structured Logging — ✅ Implemented and verified
+- Global request logging via `LoggerMiddleware` (`backend/src/common/middleware/logger.middleware.ts`), applied to all routes in `AppModule`. Logs `method path statusCode durationMs` for every request — verified in practice.
+- Rule-engine trigger logging and ML prediction input/output logging (the audit-trail half of this item) **not yet added** — current logging is request-level only, not decision-level.
 
-### 8.7 Basic Auth Boundary (Optional, Time-Permitting)
+### 8.7 Basic Auth Boundary (Optional, Time-Permitting) — not implemented, lowest priority, as planned
 - A single shared API key/header (`x-api-key`) required on write endpoints (`PATCH /tasks/:taskId`, `POST /incidents`) — not real multi-user auth, but demonstrates the team knows write endpoints shouldn't be wide open. Skip entirely if time is short; this is the lowest-priority item in §8.
 
-### 8.8 Idempotency on Writes
-- `POST /incidents` should be safe to retry (e.g. accept an optional client-generated `requestId`; if seen before, return the original response rather than creating a duplicate). Matters if the frontend ever retries a failed request automatically.
+### 8.8 Idempotency on Writes — ✅ Implemented and verified
+- `POST /incidents` accepts an optional `requestId`; if reused, `IncidentsService` returns the original incident rather than creating a duplicate. Verified: identical `requestId` sent twice returned the same `incidentId` both times.
 
-### 8.9 API Versioning
+### 8.9 API Versioning — not yet implemented
 - Prefix all endpoints with `/api/v1/` (see note at top of this file) once §8 work begins — signals the API is designed to evolve without breaking existing clients, which ties directly into README §2's "mission-oriented, could extend to fleet-wide" framing.
 
 **Priority order if time is limited:** 8.1 (validation) → 8.3 (error shape) → 8.6 (logging) → 8.5 (circuit breaker) → 8.2 (pagination) → 8.4 (caching) → 8.9 (versioning) → 8.8 (idempotency) → 8.7 (auth, cut first if short on time — least likely to come up in panel Q&A relative to effort).
+
+**Status against that order: 8.1 ✅, 8.3 ✅, 8.6 ✅ (request-level only), 8.5 partial, 8.8 ✅ (done out of order since it was cheap alongside §7's implementation) — remaining: 8.2, 8.4, 8.9, 8.7, plus finishing 8.5/8.6's decision-level logging.**
 
 ---
 
@@ -426,3 +435,4 @@ Record any change made after the Hour 0:30 lock, so nobody works against a stale
 | — | `GET /training-hub` implemented — serves `data-ml/data/training-content.json`, 4 modules with IDs matching §9's cross-feature module recommendations exactly. | Ripun |
 | — | added draft (not yet implemented) endpoints `GET /machines/:machineId/zone-status` (§13, supports README §7.5 zone tracker + compound SOS) and `GET /fleet/cost-summary` (§14, supports README §7.6 cost/ROI + fleet rollup). Reconciles README §7's differentiator list with CONTRACTS.md, which was missing these two features entirely despite being discussed and agreed on. | Ripun |
 | — | `GET /fleet/cost-summary` (§14) implemented and verified against real data. `topRiskMachines`/`machinesNearingServiceInterval` return `[]` pending Machine Health Score — not fabricated. Fixed cost constants documented in `cost-estimation.service.ts` and §14. | Ripun |
+| — | Production hardening batch: implemented and verified §8.1 (validation), §8.3 (standard error shape), §8.6 (request-level logging), §8.8 (idempotency); §8.5 (circuit breaker) partial — `/health` exists but not yet consulted by `/predict-task-time`. Implemented `PATCH /tasks/:taskId` (§6, in-memory status overlay), `POST`/`GET /incidents` (§7/§8, includes live backfill of system incidents from safety alerts). Done now (before Anamika starts frontend integration) specifically so the API surface is stable when she begins wiring, rather than risking a contract change mid-integration. | Ripun |

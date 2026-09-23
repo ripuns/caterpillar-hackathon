@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,14 +9,42 @@ import { TrainingController } from './training/training.controller';
 import { PredictionController } from './prediction/prediction.controller';
 import { OperatorsController } from './operators/operators.controller';
 import { FleetController } from './fleet/fleet.controller';
+import { HealthController } from './health/health.controller';
+import { IncidentsController } from './incidents/incidents.controller';
 import { DataLoaderService } from './data/data-loader.service';
 import { RulesService } from './rules/rules.service';
 import { CrossFeatureService } from './operators/cross-feature.service';
 import { CostEstimationService } from './fleet/cost-estimation.service';
+import { TaskStatusService } from './tasks/task-status.service';
+import { IncidentsService } from './incidents/incidents.service';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [HttpModule],
-  controllers: [AppController, TasksController, SafetyController, BehaviorController, TrainingController, PredictionController, OperatorsController, FleetController],
-  providers: [AppService, DataLoaderService, RulesService, CrossFeatureService, CostEstimationService],
+  controllers: [
+    AppController,
+    TasksController,
+    SafetyController,
+    BehaviorController,
+    TrainingController,
+    PredictionController,
+    OperatorsController,
+    FleetController,
+    HealthController,
+    IncidentsController,
+  ],
+  providers: [
+    AppService,
+    DataLoaderService,
+    RulesService,
+    CrossFeatureService,
+    CostEstimationService,
+    TaskStatusService,
+    IncidentsService,
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
