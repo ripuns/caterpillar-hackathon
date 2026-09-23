@@ -151,11 +151,26 @@ Dashboard surfaces correlations across an operator's own history — e.g., "this
 
 **Backing endpoint:** `GET /operators/:operatorId/summary` — see `CONTRACTS.md` §9.
 
+### 7.4 Machine Health Score
+
+A per-machine composite health score, structurally mirroring the Operator Performance Score (see the data/ML handoff docs): a weighted, explainable, band-classified score (`EXCELLENT`/`GOOD`/`NEEDS_ATTENTION`/`CRITICAL`) computed entirely from fields already present in `operations.csv` — no new data collection required. This completes a symmetry the system is already building: the Operator Score answers "is the *person* the risk factor," this answers "is the *equipment* the risk factor" — together they let the system distinguish an operator problem from a machine problem for the same incident, which is a materially stronger diagnostic story than either alone.
+
+**Component factors (all derived from existing `operations.csv` fields, aggregated per `machine_id` instead of per `operator_id`):**
+- **Wear/usage load** — cumulative `engine_hours` and per-session `load_cycles`; a machine working harder than its peers carries elevated risk independent of any single incident.
+- **Fuel efficiency drift** — `fuel_used_l` per session compared against the machine's own historical baseline for similar load; rising fuel use relative to its own past is a known leading indicator of mechanical degradation.
+- **Idling burden** — `idling_time_min` aggregated per machine rather than per operator; idling accumulates engine hours without productive work, affecting both wear and cost.
+- **Incident association** — safety alerts (especially proximity) tied to this specific machine regardless of which operator was driving it, isolating equipment-side risk from operator-side risk.
+- **Service-interval proximity** — `engine_hours` measured against a defined service-interval threshold; this component doubles as the trigger for the predictive-maintenance cost-avoidance feature already planned (§10/§16 of the review-form answers) — one computation feeding two features.
+
+**Owner:** Dev (score computation — same pattern as `scoring.py`, aggregated per-machine instead of per-operator) + Ripun (endpoint) + Anamika (dashboard card/gauge, same visual language as the operator score cards). **Effort:** low-moderate — reuses the exact aggregation pattern already built for the Operator Score, applied to a different grouping key over the same dataset.
+
+**Backing endpoints:** `GET /machines/:machineId/health` (single machine) and `GET /machines` (fleet-wide list) — see `CONTRACTS.md` §11.
+
 ---
 
 ## 7.5 Production Hardening (Post-Differentiators — See `CONTRACTS.md` §8)
 
-Once §7's 4 differentiator features are done, if time remains, push the build from "working demo" toward "something that could plausibly run for real" — this is what separates a hackathon checklist from something Caterpillar mentors would actually see as a credible engineering pattern, not just a feature list:
+Once §7's 4 differentiator features (§7.1–§7.4) are done, if time remains, push the build from "working demo" toward "something that could plausibly run for real" — this is what separates a hackathon checklist from something Caterpillar mentors would actually see as a credible engineering pattern, not just a feature list:
 
 - **Write endpoints**: `PATCH /tasks/:taskId` (status updates), `POST /incidents` (manual incident logging — this one directly closes a gap against the problem statement's own "incident logging" outcome, which until now only had system-generated alerts, not operator-entered ones).
 - **Input validation** on every write (reject malformed/unknown-enum data with `400` before it reaches business logic).

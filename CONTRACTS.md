@@ -217,6 +217,39 @@ Response:
 ```
 NestJS's `/health` should itself check FastAPI's health (a short-timeout ping) and report `pythonServiceReachable` — this is what §8's circuit-breaker logic (below) uses to decide whether to call the model or go straight to fallback, instead of waiting for every request to time out individually.
 
+## 11. `GET /machines/:machineId/health` — Machine Health Score (Supports §7.4)
+
+Response:
+```json
+{
+  "machineId": "M-06",
+  "score": 58,
+  "status": "NEEDS_ATTENTION",
+  "componentScores": {
+    "wearUsageLoad": 12.0,
+    "fuelEfficiencyDrift": 8.5,
+    "idlingBurden": 10.0,
+    "incidentAssociation": 15.0,
+    "serviceIntervalProximity": 12.5
+  },
+  "contributingFactors": [
+    "engine hours 4210 — above fleet median",
+    "fuel use trending 14% above this machine's own baseline",
+    "9 sessions with idling over 45 min threshold",
+    "2 proximity incidents recorded on this machine",
+    "approaching typical service interval (est. 290 engine hours remaining)"
+  ],
+  "sessionsAnalyzed": 41
+}
+```
+`status` bands, matching the Operator Score's convention exactly: `EXCELLENT` 85-100, `GOOD` 65-84, `NEEDS_ATTENTION` 40-64, `CRITICAL` 0-39. `componentScores` sum to `score`; exact weights TBD by Dev when implemented (mirror the Operator Score's approach of weighting the most safety-relevant component highest — likely `incidentAssociation` or `wearUsageLoad`).
+
+Computed by aggregating `operations.csv` per `machine_id` instead of per `operator_id` — same computation pattern as the Operator Performance Score (see data/ML handoff docs), no new data fields required.
+
+## 12. `GET /machines` — Fleet-Wide Machine Health List (Supports §7.4)
+
+Response: array of the same shape as §11, one entry per machine (10 total), for a fleet-overview dashboard view. Supports pagination — see §8.2.
+
 ---
 
 ## 8. Production Hardening (Hour 5+, Post-Core — See `EXECUTION_PLAN.md`)
@@ -328,3 +361,5 @@ Record any change made after the Hour 0:30 lock, so nobody works against a stale
 |---|---|---|
 | — | initial draft | Ripun (drafted solo, pending team confirmation) |
 | — | added `POST /predict-safety-risk` (§4.1), added `operator_id` to `tasks.csv` for §7.3 cross-feature synthesis | Ripun, per team decision on 4 differentiator features |
+| — | added `GET /machines/:machineId/health` (§11) and `GET /machines` (§12) for §7.4 Machine Health Score — no changes to any existing endpoint or dataset schema, uses existing `operations.csv` fields aggregated by `machine_id` | Ripun, per new feature decision |
+| — | **pending, not yet applied:** Dev's `CONTRACTS_PATCH.md` on the `data` branch proposes adding `training_completed_recent` to `operations.csv` and `timestamp` to `tasks.csv` (needed for his completed Operator Performance Score / cross-feature work). `operator_id` on `tasks.csv` is already covered above. Review and apply before merging `data` branch. | Dev (proposed), awaiting Ripun's merge |
