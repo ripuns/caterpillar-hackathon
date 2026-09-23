@@ -283,26 +283,30 @@ Response:
 
 ## 14. `GET /fleet/cost-summary` — Site-Wide Cost/ROI Rollup (Supports README §7.6)
 
-**Draft — not yet implemented, confirm shape with the team before building.**
+**Implemented** (`backend/src/fleet/cost-estimation.service.ts` + `fleet.controller.ts`). `topRiskMachines` and `machinesNearingServiceInterval` currently always return `[]` — they depend on the Machine Health Score (§11/§12), which is blocked on Dev's `machine_scoring.py` and not yet available. Wire those in once that exists; do not fabricate values in the meantime.
 
-Response:
+Response (real example, from the actual synthetic dataset):
 ```json
 {
-  "totalIdleCostEstimate": 842.50,
-  "totalOverrunCostEstimate": 1230.00,
-  "totalIncidentCount": 12,
+  "totalIdleCostEstimate": 1812.66,
+  "totalOverrunCostEstimate": 4030,
+  "totalIncidentCount": 52,
+  "totalIncidentCostEstimate": 7800,
   "topRiskOperators": [
-    { "operatorId": "OP-06", "estimatedCostImpact": 310.00 }
+    { "operatorId": "OP-12", "estimatedCostImpact": 2663.43 }
   ],
-  "topRiskMachines": [
-    { "machineId": "M-06", "estimatedCostImpact": 415.00 }
-  ],
-  "machinesNearingServiceInterval": [
-    { "machineId": "M-06", "estimatedDowntimeCostAvoided": 2000.00 }
-  ]
+  "topRiskMachines": [],
+  "machinesNearingServiceInterval": [],
+  "note": "Cost figures are illustrative demo estimates, not sourced from real Caterpillar data. topRiskMachines and machinesNearingServiceInterval are empty pending the Machine Health Score (README §7.4)."
 }
 ```
-Cost figures are illustrative — exact per-unit dollar assumptions (fuel cost per idle-minute, delay cost per overrun-minute, downtime cost per unplanned-maintenance event) need to be fixed as constants (same discipline as the rule thresholds — define once, document here, never diverge) before this is built. Pure aggregation/arithmetic over §9 (operator summaries) and §11/§12 (machine health) — no new data or ML required.
+
+**Fixed cost constants** (illustrative demo assumptions, not real CAT figures — documented in `cost-estimation.service.ts`, never diverge from these without updating both places):
+- `IDLE_COST_PER_MIN = 0.15` — fuel + wear/depreciation estimate
+- `OVERRUN_COST_PER_MIN = 2.0` — blended labor/opportunity cost estimate
+- `INCIDENT_COST_ESTIMATE = 150.0` — flat per-incident estimate (investigation/delay/risk exposure, not modeling actual injury/damage cost)
+
+`topRiskOperators`: top 5 operators by total estimated cost impact (idle + overrun + incident costs combined), descending, operators with $0 impact excluded. Pure aggregation over §9's underlying data (`operations.csv`/`tasks.csv`) — no new data or ML required. The `note` field is always present and should be surfaced to the panel/UI verbatim — it's the honesty mechanism for the illustrative-numbers disclosure and the machine-data gap.
 
 ---
 
@@ -421,3 +425,4 @@ Record any change made after the Hour 0:30 lock, so nobody works against a stale
 | — | rewrote §9 `/operators/:operatorId/summary` response shape to match Dev's actual `cross_feature.py` output (`operatorNeedsAttention`/`signalsFired`/`evidence`/`recommendation`) — the original placeholder shape was written before that logic existed and is no longer accurate. Implemented and verified to match Dev's reference output exactly. | Ripun |
 | — | `GET /training-hub` implemented — serves `data-ml/data/training-content.json`, 4 modules with IDs matching §9's cross-feature module recommendations exactly. | Ripun |
 | — | added draft (not yet implemented) endpoints `GET /machines/:machineId/zone-status` (§13, supports README §7.5 zone tracker + compound SOS) and `GET /fleet/cost-summary` (§14, supports README §7.6 cost/ROI + fleet rollup). Reconciles README §7's differentiator list with CONTRACTS.md, which was missing these two features entirely despite being discussed and agreed on. | Ripun |
+| — | `GET /fleet/cost-summary` (§14) implemented and verified against real data. `topRiskMachines`/`machinesNearingServiceInterval` return `[]` pending Machine Health Score — not fabricated. Fixed cost constants documented in `cost-estimation.service.ts` and §14. | Ripun |

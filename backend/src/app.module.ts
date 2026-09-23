@@ -8,13 +8,15 @@ import { BehaviorController } from './behavior/behavior.controller';
 import { TrainingController } from './training/training.controller';
 import { PredictionController } from './prediction/prediction.controller';
 import { OperatorsController } from './operators/operators.controller';
+import { FleetController } from './fleet/fleet.controller';
 import { DataLoaderService } from './data/data-loader.service';
 import { RulesService } from './rules/rules.service';
 import { CrossFeatureService } from './operators/cross-feature.service';
+import { CostEstimationService } from './fleet/cost-estimation.service';
 
 @Module({
   imports: [HttpModule],
-  controllers: [AppController, TasksController, SafetyController, BehaviorController, TrainingController, PredictionController, OperatorsController],
-  providers: [AppService, DataLoaderService, RulesService, CrossFeatureService],
+  controllers: [AppController, TasksController, SafetyController, BehaviorController, TrainingController, PredictionController, OperatorsController, FleetController],
+  providers: [AppService, DataLoaderService, RulesService, CrossFeatureService, CostEstimationService],
 })
 export class AppModule {}
