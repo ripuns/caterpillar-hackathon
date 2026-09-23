@@ -333,10 +333,7 @@ Full rationale: `README.md` §7. Build order below is fixed — do not reorder.
 ### 6.1 Why-was-I-flagged (Anamika, ~30 min)
 On the safety-alerts and behavior-flags pages, make each alert/flag card display its `message` field prominently (large text, not a tooltip) — this field already exists in the API response from §2.2 Step 2. No backend change. No new endpoint. Just a UI-prominence change.
 
-### 6.2 Live what-if task-time simulator (Anamika, ~45 min)
-On the `app/task-time/page.tsx` form (already built in §2.1 Step 3), add an `onChange` handler on each input that re-calls `predictTaskTime()` automatically (debounce ~500ms) instead of requiring an explicit submit button, so the prediction visibly updates as inputs change. Reuses the existing `/predict-task-time` call from §2.1 Step 4 — no new backend work.
-
-### 6.3 Composite safety risk score (Dev trains, Ripun wraps + integrates, ~1–1.5 hrs)
+### 6.2 Composite safety risk score (Dev trains, Ripun wraps + integrates, ~1–1.5 hrs)
 
 **Dev's part:**
 Create `data/train_risk_model.py`:
@@ -372,7 +369,7 @@ Add `src/prediction/safety-risk.controller.ts` in NestJS calling this new Python
 
 Surface it on the frontend (Anamika, small addition): on the safety-alerts page, show the risk score + top factors alongside each machine's current session if available.
 
-### 6.4 Cross-feature synthesis (Dev: logic, Anamika: UI, ~1–1.5 hrs)
+### 6.3 Cross-feature synthesis (Dev: logic, Anamika: UI, ~1–1.5 hrs)
 
 Requires `operator_id` already present in `tasks.csv` (added in §2.3 Step 1 — confirm it's there before starting this).
 
@@ -400,7 +397,7 @@ function getOperatorSummary(operatorId: string) {
 
 **Anamika's part:** new page `app/operators/[operatorId]/page.tsx` showing the summary, with `flaggedForRetraining: true` rendering a visible banner linking to `/training` (the training hub page from §2.1).
 
-**Stop condition:** if the second panel review is approaching and this isn't done, skip it — it's the lowest-priority of the 4 differentiators (see `README.md` §7.4).
+**Stop condition:** if the second panel review is approaching and this isn't done, skip it — it's the lowest-priority of the remaining 3 differentiators (see `README.md` §7.3).
 
 ---
 
@@ -421,7 +418,7 @@ Full spec: `CONTRACTS.md` §8. Ripun drives; Anamika wires any new frontend form
    - `POST /incidents` and `GET /incidents` per `CONTRACTS.md` §7–8 — in-memory array, `loggedBy: "manual"` for POSTed incidents; also backfill `loggedBy: "system"` incident entries by mapping existing rule-generated safety alerts into the same incident shape so `GET /incidents` shows a unified view.
    - Anamika: add a status-change control (dropdown or buttons) to each task card on `app/tasks/page.tsx`, calling `PATCH`; add a simple incident-report form (machineId, operatorId, description, severity dropdown) somewhere reachable from the safety page, calling `POST /incidents`, and a list view of `GET /incidents` results.
 
-6. **`GET /operators/:operatorId/summary` caching (~45 min, skip if §6.4 already handled this).** Wrap the summary computation from §6.4 in a simple in-memory cache: a `Map<operatorId, { data, expiresAt }>` with a 30-second TTL, checked before recomputing.
+6. **`GET /operators/:operatorId/summary` caching (~45 min, skip if §6.3 already handled this).** Wrap the summary computation from §6.3 in a simple in-memory cache: a `Map<operatorId, { data, expiresAt }>` with a 30-second TTL, checked before recomputing.
 
 7. **Pagination (~30 min).** Add `?page=&pageSize=` query param handling to `GET /tasks`, `GET /safety-alerts`, `GET /behavior-flags`, `GET /incidents`. Wrap responses as `{ data: [...], page, pageSize, total }` per `CONTRACTS.md` §8.2. Update `frontend/lib/api.ts` functions to accept and pass these params (default `page=1&pageSize=20` if not specified), and update list-rendering pages to read `.data` instead of the raw array.
 

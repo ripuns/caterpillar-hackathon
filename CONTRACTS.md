@@ -99,7 +99,7 @@ Response:
 
 ---
 
-## 4.1 `POST /predict-safety-risk` — Composite Safety Risk Score (Stretch, §7.3)
+## 4.1 `POST /predict-safety-risk` — Composite Safety Risk Score (Stretch, §7.2)
 
 **Called by:** NestJS → Python service, same pattern as `/predict-task-time`.
 
@@ -126,7 +126,7 @@ Response:
 }
 ```
 `riskTier`: `"low" | "medium" | "high"`, thresholded from `riskScore` (e.g. `<0.3 low`, `0.3–0.6 medium`, `>0.6 high` — Dev to tune against training data).
-`topFactors`: **required, not optional** — logistic regression coefficients × input values, sorted descending. This is the explainability mechanism (§7.3) — never return `riskScore` without it.
+`topFactors`: **required, not optional** — logistic regression coefficients × input values, sorted descending. This is the explainability mechanism (§7.2) — never return `riskScore` without it.
 `source`: `"model" | "fallback_unavailable"` — if the Python service is down, NestJS should surface `fallback_unavailable` rather than fabricate a score (unlike task-time, there is no safe rule-based fallback number for a risk score — degrade to "risk score unavailable, see individual alerts" in the UI instead).
 
 ---
@@ -194,7 +194,7 @@ Response:
 
 Response: array of the incident objects from §7 (both `loggedBy` values), newest first. Supports pagination — see §8.2.
 
-## 9. `GET /operators/:operatorId/summary` — Per-Operator Rollup (Supports §7.4)
+## 9. `GET /operators/:operatorId/summary` — Per-Operator Rollup (Supports §7.3)
 
 Response:
 ```json
@@ -207,7 +207,7 @@ Response:
   "recommendedTrainingModules": ["TH001"]
 }
 ```
-This is the concrete endpoint behind §7.4's cross-feature synthesis — NestJS computes it by joining `operations.csv` (safety alert history) and `tasks.csv` (overrun history, via the now-shared `operator_id`) per operator, at request time or on a cached interval (see §8.4).
+This is the concrete endpoint behind §7.3's cross-feature synthesis — NestJS computes it by joining `operations.csv` (safety alert history) and `tasks.csv` (overrun history, via the now-shared `operator_id`) per operator, at request time or on a cached interval (see §8.4).
 
 ## 10. `GET /health` — Service Health Check (Both NestJS and FastAPI)
 
@@ -228,7 +228,7 @@ Everything below is explicitly **not required for the first review**. It exists 
 - Reject unknown enum values explicitly (e.g. `weather: "Foggy"` should `400`, not silently fall through to an undefined rule branch).
 
 ### 8.2 Pagination
-- `GET /tasks`, `GET /safety-alerts`, `GET /behavior-flags`, `GET /incidents` accept `?page=1&pageSize=20` query params. Response wraps the array: `{ "data": [...], "page": 1, "pageSize": 20, "total": 147 }`. Prevents a growing dataset from dumping hundreds of rows into one response as the demo data grows during §7.4 work.
+- `GET /tasks`, `GET /safety-alerts`, `GET /behavior-flags`, `GET /incidents` accept `?page=1&pageSize=20` query params. Response wraps the array: `{ "data": [...], "page": 1, "pageSize": 20, "total": 147 }`. Prevents a growing dataset from dumping hundreds of rows into one response as the demo data grows during §7.3 work.
 
 ### 8.3 Standard Error Shape
 All error responses, across both NestJS and FastAPI, use the same JSON shape so the frontend has one error-handling path:
@@ -288,7 +288,7 @@ File format: **CSV**, one file per dataset, `snake_case` column headers (convert
 | Column (CSV header) | Type | Valid values / range | Notes |
 |---|---|---|---|
 | `task_id` | string | `T001`, `T002`, … | sequential |
-| `operator_id` | string | `OP-01` … `OP-15` | **added for §7.4 cross-feature synthesis** — must use the same ID space as `operations.csv`'s `operator_id` so the two datasets can be joined per operator |
+| `operator_id` | string | `OP-01` … `OP-15` | **added for §7.3 cross-feature synthesis** — must use the same ID space as `operations.csv`'s `operator_id` so the two datasets can be joined per operator |
 | `task_type` | string | `Earth Excavation` \| `Trenching` \| `Material Loading` \| `Grading` \| `Demolition` | fixed set, matches provided sample — do not invent new task types |
 | `weather` | string | `Sunny` \| `Rainy` \| `Cloudy` \| `Windy` | fixed set, matches provided sample |
 | `operator_skill` | string | `Beginner` \| `Intermediate` \| `Expert` | |
@@ -309,7 +309,7 @@ File format: **CSV**, one file per dataset, `snake_case` column headers (convert
 
 This keeps the synthetic data consistent with the 5 provided sample rows (Dev should verify: plugging those 5 rows' inputs into this rule should approximately reproduce their given `actual_time_min` values).
 
-**API boundary mapping:** `operator_id`→`operatorId`, `task_type`→`taskType`, `operator_skill`→`operatorSkill`, `machine_age_yrs`→`machineAgeYears`, `estimated_time_min`→`estimatedTimeMin`. This is the training data for the model behind `/predict-task-time` (§4) — the request shape there already matches these field names (note: `/predict-task-time`'s request doesn't need `operatorId` — that field is only for the §7.4 join, not the model input).
+**API boundary mapping:** `operator_id`→`operatorId`, `task_type`→`taskType`, `operator_skill`→`operatorSkill`, `machine_age_yrs`→`machineAgeYears`, `estimated_time_min`→`estimatedTimeMin`. This is the training data for the model behind `/predict-task-time` (§4) — the request shape there already matches these field names (note: `/predict-task-time`'s request doesn't need `operatorId` — that field is only for the §7.3 join, not the model input).
 
 ### Thresholds (FINALIZED)
 - Excessive idling: `idling_time_min > 45`
@@ -327,4 +327,4 @@ Record any change made after the Hour 0:30 lock, so nobody works against a stale
 | Time | Change | Changed by |
 |---|---|---|
 | — | initial draft | Ripun (drafted solo, pending team confirmation) |
-| — | added `POST /predict-safety-risk` (§4.1), added `operator_id` to `tasks.csv` for §7.4 cross-feature synthesis | Ripun, per team decision on 4 differentiator features |
+| — | added `POST /predict-safety-risk` (§4.1), added `operator_id` to `tasks.csv` for §7.3 cross-feature synthesis | Ripun, per team decision on 4 differentiator features |

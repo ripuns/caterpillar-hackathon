@@ -51,7 +51,7 @@ See [`EXECUTION_PLAN.md`](./EXECUTION_PLAN.md) for the detailed phase-by-phase, 
 
 **Task time estimation → real regression model.** Train on `Task Type, Weather, Operator Skill, Machine Age → Actual Time` (§3.1). A small Python/scikit-learn model (even plain linear regression or a small decision tree) trained on the synthetic dataset, wrapped in one endpoint (`POST /predict-task-time`), called from NestJS. This is the genuine "intelligent" element and the strongest panel talking point — it's real learned prediction, not a hardcoded average.
 
-**Individual safety-rule detection and unusual-behavior detection stay rule-based** (seatbelt, proximity, idling threshold) — deliberate choice, not a shortcut: deterministic per-violation logic is auditable and appropriate for safety-critical features. **Composite safety risk scoring is a second ML model, layered on top of those same rule-detected features** — see §7.3. This is not a contradiction: the inputs to the score are still rule-computed and inspectable; only the *combination* into a single risk number is learned, and it's always shown with its contributing factors so it stays explainable.
+**Individual safety-rule detection and unusual-behavior detection stay rule-based** (seatbelt, proximity, idling threshold) — deliberate choice, not a shortcut: deterministic per-violation logic is auditable and appropriate for safety-critical features. **Composite safety risk scoring is a second ML model, layered on top of those same rule-detected features** — see §7.2. This is not a contradiction: the inputs to the score are still rule-computed and inspectable; only the *combination* into a single risk number is learned, and it's always shown with its contributing factors so it stays explainable.
 
 **Optional stretch (only if core is done early):** a thin conversational layer — operator asks "what's my next task?" — as a direct LLM API call from NestJS, grounded in the app's own data. Not required; do not start this before the must-haves are solid.
 
@@ -59,7 +59,7 @@ See [`EXECUTION_PLAN.md`](./EXECUTION_PLAN.md) for the detailed phase-by-phase, 
 
 **Tech stack: NestJS backend + React/Next.js frontend + one Python microservice hosting both ML models.**
 - NestJS: dashboard API, rule engine, persistence, orchestration — plays to the team's speed.
-- Python/FastAPI: `/predict-task-time` (core, §2.1) and `/predict-safety-risk` (stretch, §7.3) — two endpoints in the same service, both scikit-learn models trained on the same dataset files. Kept deliberately narrow — see §5.4 for the integration contract.
+- Python/FastAPI: `/predict-task-time` (core, §2.1) and `/predict-safety-risk` (stretch, §7.2) — two endpoints in the same service, both scikit-learn models trained on the same dataset files. Kept deliberately narrow — see §5.4 for the integration contract.
 - Local persistence: SQLite or structured JSON/CSV files read by NestJS — no external DB needed under this timeline.
 
 ---
@@ -131,13 +131,7 @@ Surface the exact rule and values behind each safety alert in plain language on 
 
 **Owner:** Anamika (pure frontend). **Effort:** near-zero — no new endpoint needed.
 
-### 7.2 Live "What-If" Task-Time Simulator
-
-Let the operator/coordinator tweak inputs (task type, weather, skill, machine age) on a form and see the `/predict-task-time` prediction update live, before committing to a task. Reuses the existing endpoint exactly as-is — pure frontend addition, no backend changes.
-
-**Owner:** Anamika (frontend), calling Ripun's existing endpoint. **Effort:** low — a form + re-fetch on change.
-
-### 7.3 Composite Safety Risk Score (ML-Based)
+### 7.2 Composite Safety Risk Score (ML-Based)
 
 A second trained model — logistic regression, chosen specifically for interpretability — outputs a continuous safety risk score (0–1) per session, trained on `operations.csv`'s rule-violation features (seatbelt status, proximity, idling time). **Not a re-encoding of the existing OR-based alert rule** — the model should capture *interactions* between features (e.g., unfastened + high idling together carries disproportionately higher risk than either alone) that a simple OR rule can't express.
 
@@ -147,13 +141,13 @@ Served via a new endpoint, `POST /predict-safety-risk` (see `CONTRACTS.md`) — 
 
 **Owner:** Dev (train/validate model), Ripun (FastAPI wrapper + NestJS integration — same split reasoning as §5.4 for task-time). **Effort:** moderate — reuses an already-built pattern.
 
-### 7.4 Cross-Feature Synthesis
+### 7.3 Cross-Feature Synthesis
 
 Dashboard surfaces correlations across an operator's own history — e.g., "this operator has 3+ safety alerts and consistently overruns estimated task time — may need retraining," with a direct link into the training hub. This is the feature that most literally fulfills "end-to-end intelligent companion": it's the difference between 5 disconnected features and a system that reasons across its own data.
 
 **Requires:** `operator_id` added to `tasks.csv` (currently missing — see `CONTRACTS.md` schema update) so safety-alert history and task-time-overrun history can be joined per operator. Without this field, this feature cannot be built — confirm the schema change with Dev before he finalizes data generation.
 
-**Owner:** Dev (the join/aggregation logic) + Anamika (surfacing it on the dashboard). **Effort:** moderate-high — build last, after §7.1–7.3 are done, since it depends on data from both datasets being stable.
+**Owner:** Dev (the join/aggregation logic) + Anamika (surfacing it on the dashboard). **Effort:** moderate-high — build last, after §7.1–7.2 are done, since it depends on data from both datasets being stable.
 
 **Backing endpoint:** `GET /operators/:operatorId/summary` — see `CONTRACTS.md` §9.
 
@@ -167,7 +161,7 @@ Once §7's 4 differentiator features are done, if time remains, push the build f
 - **Input validation** on every write (reject malformed/unknown-enum data with `400` before it reaches business logic).
 - **Pagination** on list endpoints so a growing dataset doesn't dump hundreds of rows per response.
 - **Standard error shape** shared across NestJS and FastAPI, so the frontend has one error-handling path.
-- **Caching** on the expensive per-operator rollup (§7.4's backing endpoint).
+- **Caching** on the expensive per-operator rollup (§7.3's backing endpoint).
 - **Circuit breaker** on the NestJS→Python call, using a `/health` check, instead of waiting out a timeout on every prediction.
 - **Structured logging** of every rule trigger and every ML prediction (input + output) — this becomes a real audit trail, giving the "explainable, not black-box" narrative (§2) actual evidence rather than just a claim.
 - **API versioning** (`/api/v1/...`) — ties into the "mission-oriented, could extend to fleet-wide" framing already in §2.
