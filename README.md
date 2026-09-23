@@ -51,15 +51,15 @@ See [`EXECUTION_PLAN.md`](./EXECUTION_PLAN.md) for the detailed phase-by-phase, 
 
 **Task time estimation → real regression model.** Train on `Task Type, Weather, Operator Skill, Machine Age → Actual Time` (§3.1). A small Python/scikit-learn model (even plain linear regression or a small decision tree) trained on the synthetic dataset, wrapped in one endpoint (`POST /predict-task-time`), called from NestJS. This is the genuine "intelligent" element and the strongest panel talking point — it's real learned prediction, not a hardcoded average.
 
-**Everything else stays rule-based** (safety alerts, unusual-behavior detection) — deliberate choice, not a shortcut: deterministic logic is auditable and appropriate for safety-critical features, and it's also simply not what the new dataset is shaped for.
+**Individual safety-rule detection and unusual-behavior detection stay rule-based** (seatbelt, proximity, idling threshold) — deliberate choice, not a shortcut: deterministic per-violation logic is auditable and appropriate for safety-critical features. **Composite safety risk scoring is a second ML model, layered on top of those same rule-detected features** — see §7.2. This is not a contradiction: the inputs to the score are still rule-computed and inspectable; only the *combination* into a single risk number is learned, and it's always shown with its contributing factors so it stays explainable.
 
 **Optional stretch (only if core is done early):** a thin conversational layer — operator asks "what's my next task?" — as a direct LLM API call from NestJS, grounded in the app's own data. Not required; do not start this before the must-haves are solid.
 
 ---
 
-**Tech stack: NestJS backend + React/Next.js frontend + one small Python microservice for the task-time model.**
+**Tech stack: NestJS backend + React/Next.js frontend + one Python microservice hosting both ML models.**
 - NestJS: dashboard API, rule engine, persistence, orchestration — plays to the team's speed.
-- Python/FastAPI: single `/predict-task-time` endpoint wrapping a scikit-learn model trained on §3.1's dataset. Kept deliberately narrow — see §5.4 for the integration contract.
+- Python/FastAPI: `/predict-task-time` (core, §2.1) and `/predict-safety-risk` (stretch, §7.2) — two endpoints in the same service, both scikit-learn models trained on the same dataset files. Kept deliberately narrow — see §5.4 for the integration contract.
 - Local persistence: SQLite or structured JSON/CSV files read by NestJS — no external DB needed under this timeline.
 
 ---
@@ -114,10 +114,111 @@ This table is a starting draft — revise once the full problem statement and an
 
 Given 24 hours and 3 people:
 - **Must-have (core demo):** daily task dashboard, seatbelt + proximity safety rules with visible alerts, excessive-idling detection, one training-hub format (recommend e-learning/static content), task-time estimate live (real trained model if ready by the integration pass, Ripun's weighted-average fallback otherwise — either is an acceptable must-have result, per `EXECUTION_PLAN.md`).
-- **Nice-to-have if ahead of schedule:** incident logging as a full searchable log rather than a flat list, tuning/improving the regression model's accuracy, a second training-hub format, a "mission-oriented" extensibility angle made visible in the UI (e.g., a toggle showing "this scales to fleet view").
+- **Nice-to-have if ahead of schedule:** the 6 differentiator features in §7 (build only after the must-haves above are solid, and in the order given — later ones depend on earlier ones), incident logging as a full searchable log rather than a flat list, tuning/improving the regression model's accuracy, a second training-hub format.
 - **Cut first if behind schedule:** instructor booking / simulation modules (high effort, low payoff vs. e-learning), elaborate incident-log search/filter UI.
 
 Re-confirm this list as a team once roles are assigned and the full problem statement is reviewed.
+
+---
+
+## 7. Differentiator Features (Post-Core, Stretch — Build After §4.1 Must-Haves Are Solid)
+
+These exist to make the build stand out beyond the baseline 5 outcomes — the panel's stated interest is in ideas that could genuinely solve problems for Caterpillar, not just a completed checklist. Build order below is deliberate: cheapest/lowest-risk first, riskiest (new ML model) after the core is proven stable.
+
+### 7.1 Why-Was-I-Flagged (Alert Transparency)
+
+Surface the exact rule and values behind each safety alert in plain language on the frontend, prominently — not buried. The data already exists in `/safety-alerts`' `message` field (`CONTRACTS.md` §2); this is a UI treatment change, not new backend work. Reinforces the "explainable, not black-box" story that's already core to your safety architecture.
+
+**Owner:** Anamika (pure frontend). **Effort:** near-zero — no new endpoint needed.
+
+### 7.2 Composite Safety Risk Score (ML-Based)
+
+A second trained model — logistic regression, chosen specifically for interpretability — outputs a continuous safety risk score (0–1) per session, trained on `operations.csv`'s rule-violation features (seatbelt status, proximity, idling time). **Not a re-encoding of the existing OR-based alert rule** — the model should capture *interactions* between features (e.g., unfastened + high idling together carries disproportionately higher risk than either alone) that a simple OR rule can't express.
+
+**Why logistic regression specifically:** its coefficients are directly inspectable, the same way the task-time regression's are. This keeps the safety layer defensible to the panel — every score must be shown alongside its contributing factors (§7.1's transparency pattern applies here too), never presented as an opaque number. This is a deliberate reframe of §2's "safety is fully rule-based" language: **individual violation detection stays rule-based** (seatbelt/proximity/idling — these are the model's input features, computed exactly as before), **while composite risk scoring is now genuinely ML-based**, always shown with its contributing factors.
+
+Served via a new endpoint, `POST /predict-safety-risk` (see `CONTRACTS.md`) — same Python/FastAPI service and integration pattern as `/predict-task-time`, so the architectural cost is low; it's the same pipeline, a second model.
+
+**Owner:** Dev (train/validate model), Ripun (FastAPI wrapper + NestJS integration — same split reasoning as §5.4 for task-time). **Effort:** moderate — reuses an already-built pattern.
+
+### 7.3 Cross-Feature Synthesis
+
+Dashboard surfaces correlations across an operator's own history — e.g., "this operator has 3+ safety alerts and consistently overruns estimated task time — may need retraining," with a direct link into the training hub. This is the feature that most literally fulfills "end-to-end intelligent companion": it's the difference between 5 disconnected features and a system that reasons across its own data.
+
+**Requires:** `operator_id` added to `tasks.csv` (currently missing — see `CONTRACTS.md` schema update) so safety-alert history and task-time-overrun history can be joined per operator. Without this field, this feature cannot be built — confirm the schema change with Dev before he finalizes data generation.
+
+**Owner:** Dev (the join/aggregation logic) + Anamika (surfacing it on the dashboard). **Effort:** moderate-high — build last, after §7.1–7.2 are done, since it depends on data from both datasets being stable.
+
+**Backing endpoint:** `GET /operators/:operatorId/summary` — see `CONTRACTS.md` §9.
+
+### 7.4 Machine Health Score
+
+A per-machine composite health score, structurally mirroring the Operator Performance Score (see the data/ML handoff docs): a weighted, explainable, band-classified score (`EXCELLENT`/`GOOD`/`NEEDS_ATTENTION`/`CRITICAL`) computed entirely from fields already present in `operations.csv` — no new data collection required. This completes a symmetry the system is already building: the Operator Score answers "is the *person* the risk factor," this answers "is the *equipment* the risk factor" — together they let the system distinguish an operator problem from a machine problem for the same incident, which is a materially stronger diagnostic story than either alone.
+
+**Component factors (all derived from existing `operations.csv` fields, aggregated per `machine_id` instead of per `operator_id`):**
+- **Wear/usage load** — cumulative `engine_hours` and per-session `load_cycles`; a machine working harder than its peers carries elevated risk independent of any single incident.
+- **Fuel efficiency drift** — `fuel_used_l` per session compared against the machine's own historical baseline for similar load; rising fuel use relative to its own past is a known leading indicator of mechanical degradation.
+- **Idling burden** — `idling_time_min` aggregated per machine rather than per operator; idling accumulates engine hours without productive work, affecting both wear and cost.
+- **Incident association** — safety alerts (especially proximity) tied to this specific machine regardless of which operator was driving it, isolating equipment-side risk from operator-side risk.
+- **Service-interval proximity** — `engine_hours` measured against a defined service-interval threshold; this component doubles as the trigger for the predictive-maintenance cost-avoidance feature (§7.6) — one computation feeding two features.
+
+**Owner:** Dev (score computation — same pattern as `scoring.py`, aggregated per-machine instead of per-operator) + Ripun (endpoint) + Anamika (dashboard card/gauge, same visual language as the operator score cards). **Effort:** low-moderate — reuses the exact aggregation pattern already built for the Operator Score, applied to a different grouping key over the same dataset.
+
+**Backing endpoints:** `GET /machines/:machineId/health` (single machine) and `GET /machines` (fleet-wide list) — see `CONTRACTS.md` §11.
+
+### 7.5 Zone-Based Asset Tracker + Compound SOS Alerting
+
+A simulated 2D site map divided into zones (e.g. "Active Work Zone," "Maintenance Bay," "Restricted Zone," "Idle Yard"), each tagged with a danger tier, with each machine's current zone tracked and rendered live. The novelty isn't the map itself — it's the **compound trigger**: a machine's health score degrading *and* the machine being in a zone where that degradation is actually dangerous. A tired machine sitting in the idle yard is a maintenance note; a tired machine in an active excavation zone is an SOS. This is the feature that most visibly demonstrates the system's core thesis — reasoning *across* signals rather than treating them independently — in a single glance: a judge sees a red dot in a restricted zone and immediately understands the system caught something a simple health gauge or a simple map alone would each miss.
+
+**Directly consumes §7.4's Machine Health Score** — this is not an independent subsystem, it's the natural next consumer of that score. Build order: must come after §7.4 is working, never before.
+
+**Data requirements (genuinely new, unlike §7.1–7.4 which reuse existing fields):**
+- `current_zone` per session in `operations.csv` (fixed set of 4-5 zones)
+- A small static zone → danger-tier config (not per-row data), e.g. `{"Restricted Zone": "high", "Active Work Zone": "medium", "Maintenance Bay": "low", "Idle Yard": "low"}`
+- Optional `x, y` simulated coordinates if the map should show actual positions within a zone, not just zone membership (nice-to-have, not required for the compound-trigger logic to work)
+
+**Compound rule:** `if machineHealthScore < CRITICAL_THRESHOLD AND currentZone.dangerTier == "high": trigger SOS alert`. This is one new rule added to the existing rule engine (same pattern as seatbelt/proximity/idling), not new infrastructure — but it depends on §7.4's score being computed first.
+
+**SOS alert should be visually distinct** from a normal safety alert (different color/icon, pulsing marker on the map, dedicated banner) since it's a compound, higher-severity condition.
+
+**Honesty note for the panel:** since the app is standalone/local (§2), "real-time" here means the dashboard polls/refreshes machine position + health together on a short interval, not a literal live GPS feed. State this plainly as a deliberate simulation choice, not a limitation being hidden.
+
+**Owner:** Dev (add `current_zone` to the generator, build the compound SOS trigger logic — mirrors the pattern of `alert_reasoning.py`) + Ripun (endpoint) + Anamika (the 2D canvas/map component — this is genuinely new, non-trivial frontend work compared to the list-based views already built, budget accordingly). **Effort:** moderate — the backend logic is cheap once §7.4 exists, but the frontend map view is a real lift, not a small addition.
+
+**Backing endpoint:** `GET /machines/:machineId/zone-status` (or folded into §7.4's `GET /machines/:machineId/health` response as an additional field — decide at implementation time based on how Anamika wants to consume it) — not yet formally specified in `CONTRACTS.md`, add before building against it.
+
+### 7.6 Cost/ROI Translation + Fleet-Level Rollup
+
+Translates the system's existing detection into a language a fleet manager or the panel actually responds to: cost. Reuses data already being collected — no new instrumentation, purely a computation/aggregation layer on top of what already exists.
+
+**Three components:**
+1. **Cost translation** — idling time, task overruns, and safety incidents converted into dollar terms: a fuel-cost-per-idle-minute multiplier on `fuel_used_l`/`idling_time_min`, a delay-cost-per-overrun-minute multiplier on task-time overrun data. Pure arithmetic on existing fields, no new model.
+2. **Fleet/site-level rollup** — aggregates the per-operator (§7.3) and per-machine (§7.4) views into a supervisor-facing dashboard: total idle-cost across the site, which operators/machines carry the highest risk, total overrun-hours this week. Turns a single-cab tool into operations intelligence — reuses the exact aggregation pattern already built for Operator/Machine scores, just summed across all operators/machines instead of returned per-entity.
+3. **Predictive-maintenance cost avoidance** — extends §7.4's service-interval-proximity component with a dollar estimate: "flagging this now avoids an estimated $X unplanned-downtime cost." Directly ties the system to what the problem statement's own background section identifies as the industry's largest cost driver (§2).
+
+**Why this matters more than it sounds:** every other differentiator so far answers "what's wrong." This is the one that answers "so what" — which is the question an industrial client actually asks after a demo. Deliberately built as direct, auditable arithmetic (not AI) so a dollar figure shown to a supervisor is always defensible on the spot, not another model's guess.
+
+**Owner:** whoever's least loaded once §7.1–7.5 are stable — likely Ripun (aggregation/endpoint logic, low complexity) + Anamika (supervisor rollup view). **Effort:** low for cost translation and predictive-maintenance flag (pure multipliers), moderate for the fleet rollup view (new aggregation endpoint + new UI, but no new data or ML).
+
+**Backing endpoints:** not yet formally specified in `CONTRACTS.md` — suggested: `GET /fleet/cost-summary` (site-wide rollup) and a `costEstimate` field added to §7.4's machine health response (predictive-maintenance dollar figure). Add to `CONTRACTS.md` before building against it.
+
+---
+
+## 7.7 Production Hardening (Post-Differentiators — See `CONTRACTS.md` §8)
+
+Once §7's 6 differentiator features (§7.1–§7.6) are done, if time remains, push the build from "working demo" toward "something that could plausibly run for real" — this is what separates a hackathon checklist from something Caterpillar mentors would actually see as a credible engineering pattern, not just a feature list:
+
+- **Write endpoints**: `PATCH /tasks/:taskId` (status updates), `POST /incidents` (manual incident logging — this one directly closes a gap against the problem statement's own "incident logging" outcome, which until now only had system-generated alerts, not operator-entered ones).
+- **Input validation** on every write (reject malformed/unknown-enum data with `400` before it reaches business logic).
+- **Pagination** on list endpoints so a growing dataset doesn't dump hundreds of rows per response.
+- **Standard error shape** shared across NestJS and FastAPI, so the frontend has one error-handling path.
+- **Caching** on the expensive per-operator rollup (§7.3's backing endpoint).
+- **Circuit breaker** on the NestJS→Python call, using a `/health` check, instead of waiting out a timeout on every prediction.
+- **Structured logging** of every rule trigger and every ML prediction (input + output) — this becomes a real audit trail, giving the "explainable, not black-box" narrative (§2) actual evidence rather than just a claim.
+- **API versioning** (`/api/v1/...`) — ties into the "mission-oriented, could extend to fleet-wide" framing already in §2.
+- **Basic write-endpoint auth** and **idempotent retries** on `POST /incidents` — lowest priority, cut first if time is short.
+
+Full endpoint shapes, priority order, and detail: `CONTRACTS.md` §6–§10 (new endpoints) and §8 (hardening checklist). Do not start this before §7's differentiators — this is depth on top of features that already exist, not a replacement for having the features.
 
 ---
 

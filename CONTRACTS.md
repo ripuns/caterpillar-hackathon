@@ -4,6 +4,8 @@ Endpoint shapes and dataset schema below are **finalized drafts** — concrete e
 
 **Ports:** NestJS `3000` · Python (FastAPI) `8001` · Next.js `3001` (or framework default)
 
+**API base path:** all core endpoints below are versioned under `/api/v1/...` once §8 (Production Hardening) is implemented — e.g. `GET /api/v1/tasks`. Until then, unversioned paths (`GET /tasks`) are fine for the first-review demo; do not block core-hour work on adding the prefix. §8 covers the migration.
+
 ---
 
 ## 1. `GET /tasks` — Daily Task Dashboard
@@ -97,20 +99,250 @@ Response:
 
 ---
 
+## 4.1 `POST /predict-safety-risk` — Composite Safety Risk Score (Stretch, §7.2)
+
+**Called by:** NestJS → Python service, same pattern as `/predict-task-time`.
+
+Request:
+```json
+{
+  "seatbeltStatus": "Unfastened",
+  "distanceToNearestObjectM": 1.8,
+  "idlingTimeMin": 52
+}
+```
+
+Response:
+```json
+{
+  "riskScore": 0.72,
+  "riskTier": "high",
+  "topFactors": [
+    { "factor": "seatbeltStatus", "contribution": 0.31 },
+    { "factor": "distanceToNearestObjectM", "contribution": 0.28 },
+    { "factor": "idlingTimeMin", "contribution": 0.13 }
+  ],
+  "source": "model"
+}
+```
+`riskTier`: `"low" | "medium" | "high"`, thresholded from `riskScore` (e.g. `<0.3 low`, `0.3–0.6 medium`, `>0.6 high` — Dev to tune against training data).
+`topFactors`: **required, not optional** — logistic regression coefficients × input values, sorted descending. This is the explainability mechanism (§7.2) — never return `riskScore` without it.
+`source`: `"model" | "fallback_unavailable"` — if the Python service is down, NestJS should surface `fallback_unavailable` rather than fabricate a score (unlike task-time, there is no safe rule-based fallback number for a risk score — degrade to "risk score unavailable, see individual alerts" in the UI instead).
+
+---
+
 ## 5. `GET /training-hub`
+
+**Implemented.** Serves `data-ml/data/training-content.json`, 4 fixed modules whose `moduleId`s match exactly what §9's cross-feature synthesis references (`TH_SAFE_EFFICIENT_OPS`, `TH_SAFETY_UNDER_PRESSURE`, `TH_TIME_MANAGEMENT`, `TH_GENERAL_REFRESHER`) — these IDs are not arbitrary, they correspond to which combination of safety/behavior/task signals triggered the recommendation.
 
 Response:
 ```json
 [
   {
-    "moduleId": "TH001",
-    "title": "Safe Excavation Practices",
+    "moduleId": "TH_SAFE_EFFICIENT_OPS",
+    "title": "Safe and Efficient Machine Operation",
     "format": "article",
     "content": "..."
   }
 ]
 ```
 `format`: fixed to `"article"` for this build (e-learning/static content — see README §4.1 scope decision). Extend only if time allows.
+
+---
+
+## 6. `PATCH /tasks/:taskId` — Update Task Status (§8, Production Hardening)
+
+Request:
+```json
+{ "status": "in_progress" }
+```
+`status`: `"pending" | "in_progress" | "completed"`
+
+Response: the updated task object (same shape as §1's list items).
+
+Errors: `404` if `taskId` doesn't exist (see §8.3 error shape), `400` if `status` isn't a valid value.
+
+---
+
+## 7. `POST /incidents` — Manual Incident Logging (§8, Production Hardening)
+
+Directly addresses the problem statement's "incident logging" outcome — currently only system-generated alerts exist (§2); this lets an operator/coordinator log something manually (e.g. a near-miss the sensors didn't catch).
+
+Request:
+```json
+{
+  "machineId": "M-12",
+  "operatorId": "OP-04",
+  "description": "Loose debris near loading zone, cleared manually.",
+  "severity": "medium"
+}
+```
+
+Response:
+```json
+{
+  "incidentId": "I001",
+  "machineId": "M-12",
+  "operatorId": "OP-04",
+  "timestamp": "2026-09-24T10:02:00Z",
+  "description": "Loose debris near loading zone, cleared manually.",
+  "severity": "medium",
+  "loggedBy": "manual"
+}
+```
+`severity`: `"low" | "medium" | "high"`. `loggedBy`: `"manual" | "system"` — distinguishes operator-entered incidents from rule-engine-generated ones, both of which should appear in a unified incident view.
+
+## 8. `GET /incidents` — List Incidents
+
+Response: array of the incident objects from §7 (both `loggedBy` values), newest first. Supports pagination — see §8.2.
+
+## 9. `GET /operators/:operatorId/summary` — Per-Operator Rollup (Supports §7.3)
+
+**Implemented, matching Dev's `data-ml/cross_feature.py` reference logic exactly** (see `data-ml/BACKEND_HANDOFF.md` §4 and `backend/src/operators/cross-feature.service.ts`). This shape supersedes an earlier placeholder written before that logic existed.
+
+Response:
+```json
+{
+  "operatorId": "OP-03",
+  "operatorNeedsAttention": true,
+  "signalsFired": ["safety", "task"],
+  "evidence": {
+    "safetyIncidentCount": 2,
+    "idlingSessionCount": 0,
+    "overrunTaskCount": 2
+  },
+  "recommendation": "Consider refresher training: Maintaining Safety Standards Under Time Pressure.",
+  "recommendedModuleId": "TH_SAFETY_UNDER_PRESSURE",
+  "recommendedModuleTitle": "Maintaining Safety Standards Under Time Pressure"
+}
+```
+
+`signalsFired`: subset of `["safety", "behavior", "task"]`, each computed independently (safety = seatbelt/proximity only, behavior = idling only, task = overrun only — deliberately not derived from `safety_alert_triggered`, which conflates idling with safety per the dataset's generation rule; see `data-ml/cross_feature.py`'s "AUDIT FIX" note). `operatorNeedsAttention` requires **2 of 3** signals fired, not just one. `recommendedModuleId` is one of the 4 fixed training-hub module IDs (`TH_SAFE_EFFICIENT_OPS`, `TH_SAFETY_UNDER_PRESSURE`, `TH_TIME_MANAGEMENT`, `TH_GENERAL_REFRESHER`), matching `GET /training-hub`'s actual content — see §5.
+
+Returns `404` if `operatorId` doesn't exist in either dataset. Thresholds (safety incident count ≥2, idling session count ≥2, overrun task count ≥2, task overrun ≥15%) are fixed constants matching `data-ml/thresholds.py` exactly — do not diverge between the TypeScript and Python implementations.
+
+NestJS computes this by filtering the in-memory `operations.csv`/`tasks.csv` (loaded once at startup) per operator — see §8.4 for the caching recommendation once this becomes an expensive/frequent call.
+
+## 10. `GET /health` — Service Health Check (Both NestJS and FastAPI)
+
+Response:
+```json
+{ "status": "ok", "uptime": 3421, "pythonServiceReachable": true }
+```
+NestJS's `/health` should itself check FastAPI's health (a short-timeout ping) and report `pythonServiceReachable` — this is what §8's circuit-breaker logic (below) uses to decide whether to call the model or go straight to fallback, instead of waiting for every request to time out individually.
+
+## 11. `GET /machines/:machineId/health` — Machine Health Score (Supports §7.4)
+
+Response:
+```json
+{
+  "machineId": "M-06",
+  "score": 58,
+  "status": "NEEDS_ATTENTION",
+  "componentScores": {
+    "wearUsageLoad": 12.0,
+    "fuelEfficiencyDrift": 8.5,
+    "idlingBurden": 10.0,
+    "incidentAssociation": 15.0,
+    "serviceIntervalProximity": 12.5
+  },
+  "contributingFactors": [
+    "engine hours 4210 — above fleet median",
+    "fuel use trending 14% above this machine's own baseline",
+    "9 sessions with idling over 45 min threshold",
+    "2 proximity incidents recorded on this machine",
+    "approaching typical service interval (est. 290 engine hours remaining)"
+  ],
+  "sessionsAnalyzed": 41
+}
+```
+`status` bands, matching the Operator Score's convention exactly: `EXCELLENT` 85-100, `GOOD` 65-84, `NEEDS_ATTENTION` 40-64, `CRITICAL` 0-39. `componentScores` sum to `score`; exact weights TBD by Dev when implemented (mirror the Operator Score's approach of weighting the most safety-relevant component highest — likely `incidentAssociation` or `wearUsageLoad`).
+
+Computed by aggregating `operations.csv` per `machine_id` instead of per `operator_id` — same computation pattern as the Operator Performance Score (see data/ML handoff docs), no new data fields required.
+
+## 12. `GET /machines` — Fleet-Wide Machine Health List (Supports §7.4)
+
+Response: array of the same shape as §11, one entry per machine (10 total), for a fleet-overview dashboard view. Supports pagination — see §8.2.
+
+## 13. `GET /machines/:machineId/zone-status` — Zone + Compound SOS Status (Supports README §7.5)
+
+**Draft — not yet implemented, confirm shape with the team before building.**
+
+Response:
+```json
+{
+  "machineId": "M-06",
+  "currentZone": "Restricted Zone",
+  "zoneDangerTier": "high",
+  "machineHealthScore": 32,
+  "sosActive": true,
+  "sosReason": "Machine health score 32 (below CRITICAL threshold) while in a high-danger zone"
+}
+```
+`sosActive` is the compound trigger from README §7.5: `true` only when `machineHealthScore` is below the CRITICAL threshold (see §11's status bands — below 40) **and** `zoneDangerTier == "high"`. Requires §11's Machine Health Score to already be computed — this endpoint calls that logic internally rather than duplicating it. Requires `current_zone` added to `operations.csv` (not yet present — new data requirement, see README §7.5).
+
+## 14. `GET /fleet/cost-summary` — Site-Wide Cost/ROI Rollup (Supports README §7.6)
+
+**Draft — not yet implemented, confirm shape with the team before building.**
+
+Response:
+```json
+{
+  "totalIdleCostEstimate": 842.50,
+  "totalOverrunCostEstimate": 1230.00,
+  "totalIncidentCount": 12,
+  "topRiskOperators": [
+    { "operatorId": "OP-06", "estimatedCostImpact": 310.00 }
+  ],
+  "topRiskMachines": [
+    { "machineId": "M-06", "estimatedCostImpact": 415.00 }
+  ],
+  "machinesNearingServiceInterval": [
+    { "machineId": "M-06", "estimatedDowntimeCostAvoided": 2000.00 }
+  ]
+}
+```
+Cost figures are illustrative — exact per-unit dollar assumptions (fuel cost per idle-minute, delay cost per overrun-minute, downtime cost per unplanned-maintenance event) need to be fixed as constants (same discipline as the rule thresholds — define once, document here, never diverge) before this is built. Pure aggregation/arithmetic over §9 (operator summaries) and §11/§12 (machine health) — no new data or ML required.
+
+---
+
+## 8. Production Hardening (Hour 5+, Post-Core — See `EXECUTION_PLAN.md`)
+
+Everything below is explicitly **not required for the first review**. It exists to take this from "working demo" toward "something that could plausibly run for real," which is the more ambitious bar the team is now building toward. Build only after the core 5 outcomes and the §7 differentiator features are solid.
+
+### 8.1 Input Validation
+- Every `POST`/`PATCH` body validated against its schema (NestJS: `class-validator` DTOs; FastAPI: Pydantic models — already idiomatic there). Reject malformed requests with `400` before they reach business logic, not after.
+- Reject unknown enum values explicitly (e.g. `weather: "Foggy"` should `400`, not silently fall through to an undefined rule branch).
+
+### 8.2 Pagination
+- `GET /tasks`, `GET /safety-alerts`, `GET /behavior-flags`, `GET /incidents` accept `?page=1&pageSize=20` query params. Response wraps the array: `{ "data": [...], "page": 1, "pageSize": 20, "total": 147 }`. Prevents a growing dataset from dumping hundreds of rows into one response as the demo data grows during §7.3 work.
+
+### 8.3 Standard Error Shape
+All error responses, across both NestJS and FastAPI, use the same JSON shape so the frontend has one error-handling path:
+```json
+{ "error": { "code": "TASK_NOT_FOUND", "message": "Task T999 does not exist", "statusCode": 404 } }
+```
+
+### 8.4 Caching for Expensive Reads
+- `GET /operators/:operatorId/summary` (§9) recomputes a join across both datasets — cache it in-memory (a simple `Map` with a short TTL, e.g. 30s) rather than recomputing per request. Not a real production cache, but demonstrates awareness of the cost.
+
+### 8.5 Circuit Breaker for the Python Service
+- Use `GET /health`'s `pythonServiceReachable` (§10) to short-circuit: if the last health check failed, skip the network call entirely and go straight to fallback (§4's `fallback_average` / §4.1's `fallback_unavailable`) instead of waiting out a timeout on every prediction request. Simple in-memory flag, refreshed every ~10s, is enough — no need for a real library.
+
+### 8.6 Structured Logging
+- Every request logged with: timestamp, method, path, status code, duration — plain `console.log`/Python `logging` is fine, but keep the format consistent so panel Q&A about "how would you debug this in production" has a real answer.
+- Log every rule-engine trigger (which rule fired, on what data) and every ML prediction (input + output) — this becomes your audit trail, which directly supports the "explainable, not black-box" narrative (§2) with actual evidence, not just a claim.
+
+### 8.7 Basic Auth Boundary (Optional, Time-Permitting)
+- A single shared API key/header (`x-api-key`) required on write endpoints (`PATCH /tasks/:taskId`, `POST /incidents`) — not real multi-user auth, but demonstrates the team knows write endpoints shouldn't be wide open. Skip entirely if time is short; this is the lowest-priority item in §8.
+
+### 8.8 Idempotency on Writes
+- `POST /incidents` should be safe to retry (e.g. accept an optional client-generated `requestId`; if seen before, return the original response rather than creating a duplicate). Matters if the frontend ever retries a failed request automatically.
+
+### 8.9 API Versioning
+- Prefix all endpoints with `/api/v1/` (see note at top of this file) once §8 work begins — signals the API is designed to evolve without breaking existing clients, which ties directly into README §2's "mission-oriented, could extend to fleet-wide" framing.
+
+**Priority order if time is limited:** 8.1 (validation) → 8.3 (error shape) → 8.6 (logging) → 8.5 (circuit breaker) → 8.2 (pagination) → 8.4 (caching) → 8.9 (versioning) → 8.8 (idempotency) → 8.7 (auth, cut first if short on time — least likely to come up in panel Q&A relative to effort).
 
 ---
 
@@ -143,6 +375,7 @@ File format: **CSV**, one file per dataset, `snake_case` column headers (convert
 | Column (CSV header) | Type | Valid values / range | Notes |
 |---|---|---|---|
 | `task_id` | string | `T001`, `T002`, … | sequential |
+| `operator_id` | string | `OP-01` … `OP-15` | **added for §7.3 cross-feature synthesis** — must use the same ID space as `operations.csv`'s `operator_id` so the two datasets can be joined per operator |
 | `task_type` | string | `Earth Excavation` \| `Trenching` \| `Material Loading` \| `Grading` \| `Demolition` | fixed set, matches provided sample — do not invent new task types |
 | `weather` | string | `Sunny` \| `Rainy` \| `Cloudy` \| `Windy` | fixed set, matches provided sample |
 | `operator_skill` | string | `Beginner` \| `Intermediate` \| `Expert` | |
@@ -163,7 +396,7 @@ File format: **CSV**, one file per dataset, `snake_case` column headers (convert
 
 This keeps the synthetic data consistent with the 5 provided sample rows (Dev should verify: plugging those 5 rows' inputs into this rule should approximately reproduce their given `actual_time_min` values).
 
-**API boundary mapping:** `task_type`→`taskType`, `operator_skill`→`operatorSkill`, `machine_age_yrs`→`machineAgeYears`, `estimated_time_min`→`estimatedTimeMin`. This is the training data for the model behind `/predict-task-time` (§4) — the request shape there already matches these field names.
+**API boundary mapping:** `operator_id`→`operatorId`, `task_type`→`taskType`, `operator_skill`→`operatorSkill`, `machine_age_yrs`→`machineAgeYears`, `estimated_time_min`→`estimatedTimeMin`. This is the training data for the model behind `/predict-task-time` (§4) — the request shape there already matches these field names (note: `/predict-task-time`'s request doesn't need `operatorId` — that field is only for the §7.3 join, not the model input).
 
 ### Thresholds (FINALIZED)
 - Excessive idling: `idling_time_min > 45`
@@ -181,3 +414,10 @@ Record any change made after the Hour 0:30 lock, so nobody works against a stale
 | Time | Change | Changed by |
 |---|---|---|
 | — | initial draft | Ripun (drafted solo, pending team confirmation) |
+| — | added `POST /predict-safety-risk` (§4.1), added `operator_id` to `tasks.csv` for §7.3 cross-feature synthesis | Ripun, per team decision on 4 differentiator features |
+| — | added `GET /machines/:machineId/health` (§11) and `GET /machines` (§12) for §7.4 Machine Health Score — no changes to any existing endpoint or dataset schema, uses existing `operations.csv` fields aggregated by `machine_id` | Ripun, per new feature decision |
+| — | **applied:** Dev's `CONTRACTS_PATCH.md` fields (`training_completed_recent` on `operations.csv`, `timestamp` on `tasks.csv`, `operator_id` already covered above) confirmed present after merging `data` branch into `backend`. | Ripun, after merge |
+| — | added `machine_id` to `tasks.csv` (was missing — no operator-machine affinity exists in `operations.csv` to preserve, so assigned via seeded deterministic randomization) to satisfy §1's `/tasks` response shape. Applied identically on both `backend` and `data` branches. | Ripun |
+| — | rewrote §9 `/operators/:operatorId/summary` response shape to match Dev's actual `cross_feature.py` output (`operatorNeedsAttention`/`signalsFired`/`evidence`/`recommendation`) — the original placeholder shape was written before that logic existed and is no longer accurate. Implemented and verified to match Dev's reference output exactly. | Ripun |
+| — | `GET /training-hub` implemented — serves `data-ml/data/training-content.json`, 4 modules with IDs matching §9's cross-feature module recommendations exactly. | Ripun |
+| — | added draft (not yet implemented) endpoints `GET /machines/:machineId/zone-status` (§13, supports README §7.5 zone tracker + compound SOS) and `GET /fleet/cost-summary` (§14, supports README §7.6 cost/ROI + fleet rollup). Reconciles README §7's differentiator list with CONTRACTS.md, which was missing these two features entirely despite being discussed and agreed on. | Ripun |
