@@ -1,249 +1,249 @@
-task_id,operator_id,timestamp,task_type,weather,operator_skill,machine_age_yrs,estimated_time_min,actual_time_min
-T057,OP-04,2026-07-26T21:59:44Z,Material Loading,Windy,Expert,7,31,37
-T094,OP-06,2026-07-27T18:50:08Z,Earth Excavation,Sunny,Expert,5,46,41
-T101,OP-07,2026-07-27T18:57:03Z,Earth Excavation,Windy,Intermediate,9,50,62
-T005,OP-01,2026-07-27T23:15:38Z,Trenching,Cloudy,Expert,6,52,51
-T029,OP-02,2026-07-29T00:40:01Z,Grading,Sunny,Expert,3,37,35
-T125,OP-08,2026-07-29T04:25:42Z,Earth Excavation,Cloudy,Intermediate,4,70,80
-T126,OP-08,2026-07-29T07:49:46Z,Earth Excavation,Rainy,Intermediate,8,54,66
-T002,OP-01,2026-07-29T16:51:17Z,Trenching,Sunny,Expert,5,50,48
-T014,OP-01,2026-07-29T17:40:00Z,Earth Excavation,Rainy,Expert,3,48,53
-T037,OP-03,2026-07-30T01:39:08Z,Trenching,Windy,Expert,4,39,43
-T204,OP-13,2026-07-30T02:40:58Z,Grading,Windy,Intermediate,5,35,39
-T024,OP-02,2026-07-30T04:07:19Z,Trenching,Cloudy,Expert,9,43,44
-T165,OP-11,2026-07-30T06:53:32Z,Demolition,Sunny,Intermediate,9,91,135
-T129,OP-08,2026-07-30T07:47:34Z,Earth Excavation,Rainy,Intermediate,5,56,66
-T208,OP-13,2026-07-30T23:08:42Z,Demolition,Sunny,Intermediate,1,99,105
-T199,OP-13,2026-07-31T02:01:23Z,Trenching,Sunny,Intermediate,1,51,50
-T010,OP-01,2026-07-31T03:56:16Z,Material Loading,Windy,Expert,6,33,36
-T006,OP-01,2026-07-31T11:25:49Z,Demolition,Windy,Expert,10,89,94
-T191,OP-12,2026-07-31T11:56:04Z,Trenching,Windy,Expert,7,40,39
-T059,OP-04,2026-07-31T23:05:26Z,Demolition,Windy,Expert,4,104,100
-T035,OP-03,2026-07-31T23:36:49Z,Trenching,Cloudy,Expert,6,46,48
-T244,OP-15,2026-08-01T06:04:42Z,Demolition,Cloudy,Intermediate,9,84,101
-T246,OP-15,2026-08-02T04:43:25Z,Demolition,Sunny,Intermediate,4,82,91
-T234,OP-15,2026-08-02T18:36:31Z,Grading,Rainy,Intermediate,7,47,55
-T089,OP-06,2026-08-02T19:26:00Z,Earth Excavation,Windy,Expert,2,54,55
-T221,OP-14,2026-08-02T21:30:01Z,Material Loading,Windy,Expert,3,24,24
-T212,OP-13,2026-08-03T05:10:34Z,Demolition,Cloudy,Intermediate,10,88,88
-T067,OP-05,2026-08-03T05:20:15Z,Earth Excavation,Sunny,Intermediate,7,49,61
-T120,OP-08,2026-08-03T07:27:52Z,Material Loading,Windy,Intermediate,4,36,38
-T238,OP-15,2026-08-03T15:38:05Z,Grading,Cloudy,Intermediate,10,43,49
-T102,OP-07,2026-08-03T18:55:40Z,Material Loading,Rainy,Intermediate,7,23,31
-T108,OP-07,2026-08-04T00:13:57Z,Earth Excavation,Sunny,Intermediate,9,58,59
-T183,OP-12,2026-08-04T01:24:47Z,Grading,Rainy,Expert,6,42,48
-T113,OP-07,2026-08-04T11:04:48Z,Trenching,Rainy,Intermediate,5,50,57
-T021,OP-02,2026-08-04T11:05:37Z,Demolition,Cloudy,Expert,4,83,81
-T063,OP-05,2026-08-04T12:17:37Z,Demolition,Windy,Intermediate,3,89,112
-T055,OP-04,2026-08-04T15:11:39Z,Material Loading,Cloudy,Expert,9,26,24
-T172,OP-11,2026-08-05T03:32:30Z,Material Loading,Rainy,Intermediate,8,19,30
-T218,OP-14,2026-08-05T17:00:40Z,Demolition,Windy,Expert,10,97,107
-T132,OP-08,2026-08-05T19:32:23Z,Earth Excavation,Cloudy,Intermediate,1,51,55
-T196,OP-12,2026-08-05T22:55:57Z,Demolition,Sunny,Expert,8,88,101
-T098,OP-07,2026-08-06T03:07:08Z,Earth Excavation,Sunny,Intermediate,9,53,57
-T164,OP-11,2026-08-06T06:08:16Z,Trenching,Cloudy,Intermediate,9,54,68
-T082,OP-06,2026-08-06T06:49:05Z,Trenching,Cloudy,Expert,3,48,44
-T026,OP-02,2026-08-06T11:34:40Z,Demolition,Sunny,Expert,1,94,95
-T028,OP-02,2026-08-06T11:47:30Z,Trenching,Rainy,Expert,1,43,46
-T066,OP-05,2026-08-06T18:21:32Z,Demolition,Sunny,Intermediate,9,93,93
-T206,OP-13,2026-08-07T10:32:50Z,Grading,Cloudy,Intermediate,9,33,38
-T235,OP-15,2026-08-07T11:58:03Z,Grading,Cloudy,Intermediate,2,44,45
-T226,OP-14,2026-08-08T10:47:56Z,Trenching,Cloudy,Expert,1,36,35
-T198,OP-13,2026-08-08T12:25:09Z,Demolition,Cloudy,Intermediate,8,100,121
-T044,OP-03,2026-08-08T13:05:48Z,Trenching,Rainy,Expert,6,56,70
-T233,OP-15,2026-08-08T16:07:23Z,Material Loading,Rainy,Intermediate,2,28,33
-T162,OP-11,2026-08-08T17:08:14Z,Grading,Windy,Intermediate,2,36,50
-T052,OP-04,2026-08-09T00:29:46Z,Demolition,Cloudy,Expert,5,83,73
-T131,OP-08,2026-08-09T00:47:59Z,Trenching,Rainy,Intermediate,7,51,60
-T202,OP-13,2026-08-09T04:22:37Z,Earth Excavation,Rainy,Intermediate,8,45,51
-T231,OP-14,2026-08-09T06:26:39Z,Trenching,Cloudy,Expert,7,33,31
-T074,OP-05,2026-08-09T10:23:47Z,Material Loading,Cloudy,Intermediate,5,39,41
-T036,OP-03,2026-08-09T14:02:26Z,Demolition,Windy,Expert,8,100,125
-T099,OP-07,2026-08-09T16:41:20Z,Demolition,Rainy,Intermediate,6,93,131
-T239,OP-15,2026-08-10T01:34:25Z,Demolition,Sunny,Intermediate,8,94,92
-T127,OP-08,2026-08-10T06:57:42Z,Grading,Sunny,Intermediate,2,34,37
-T184,OP-12,2026-08-10T12:32:27Z,Earth Excavation,Rainy,Expert,5,55,63
-T175,OP-11,2026-08-10T16:15:47Z,Trenching,Cloudy,Intermediate,8,45,65
-T069,OP-05,2026-08-10T18:27:44Z,Material Loading,Rainy,Intermediate,7,38,48
-T142,OP-09,2026-08-11T01:43:09Z,Demolition,Sunny,Beginner,5,89,148
-T048,OP-03,2026-08-11T07:31:29Z,Demolition,Cloudy,Expert,3,94,83
-T205,OP-13,2026-08-11T12:35:43Z,Grading,Windy,Intermediate,2,49,56
-T147,OP-10,2026-08-12T14:43:41Z,Grading,Cloudy,Intermediate,3,30,38
-T130,OP-08,2026-08-12T17:38:11Z,Earth Excavation,Sunny,Intermediate,3,55,59
-T001,OP-01,2026-08-13T00:57:47Z,Material Loading,Rainy,Expert,10,31,35
-T225,OP-14,2026-08-13T06:44:50Z,Demolition,Cloudy,Expert,8,97,98
-T058,OP-04,2026-08-13T08:09:42Z,Earth Excavation,Windy,Expert,8,51,51
-T123,OP-08,2026-08-13T09:54:12Z,Earth Excavation,Cloudy,Intermediate,3,53,55
-T151,OP-10,2026-08-13T11:06:00Z,Demolition,Cloudy,Intermediate,7,84,115
-T007,OP-01,2026-08-13T13:42:37Z,Grading,Rainy,Expert,1,39,38
-T236,OP-15,2026-08-13T19:52:20Z,Trenching,Windy,Intermediate,8,50,54
-T045,OP-03,2026-08-13T20:27:12Z,Trenching,Cloudy,Expert,6,48,52
-T242,OP-15,2026-08-14T06:35:27Z,Earth Excavation,Rainy,Intermediate,9,58,79
-T192,OP-12,2026-08-14T07:05:21Z,Earth Excavation,Rainy,Expert,6,46,48
-T050,OP-04,2026-08-14T10:38:33Z,Trenching,Sunny,Expert,6,43,47
-T030,OP-02,2026-08-14T12:43:58Z,Grading,Sunny,Expert,5,30,30
-T163,OP-11,2026-08-14T14:44:06Z,Grading,Windy,Intermediate,9,42,70
-T197,OP-13,2026-08-14T16:21:30Z,Material Loading,Sunny,Intermediate,5,30,33
-T068,OP-05,2026-08-14T19:00:53Z,Material Loading,Rainy,Intermediate,9,28,33
-T095,OP-06,2026-08-15T00:55:52Z,Demolition,Sunny,Expert,8,90,80
-T217,OP-14,2026-08-15T04:53:21Z,Material Loading,Rainy,Expert,2,41,41
-T220,OP-14,2026-08-15T12:47:17Z,Material Loading,Cloudy,Expert,1,37,39
-T224,OP-14,2026-08-15T13:54:46Z,Grading,Cloudy,Expert,4,44,40
-T245,OP-15,2026-08-16T03:58:01Z,Earth Excavation,Rainy,Intermediate,6,50,67
-T073,OP-05,2026-08-16T11:44:06Z,Demolition,Cloudy,Intermediate,2,85,94
-T194,OP-12,2026-08-16T12:27:12Z,Grading,Cloudy,Expert,8,42,42
-T195,OP-12,2026-08-16T17:37:21Z,Grading,Windy,Expert,10,45,52
-T081,OP-06,2026-08-16T18:56:52Z,Earth Excavation,Rainy,Expert,5,51,52
-T053,OP-04,2026-08-16T19:09:01Z,Trenching,Cloudy,Expert,2,47,48
-T012,OP-01,2026-08-16T21:14:18Z,Material Loading,Sunny,Expert,6,33,33
-T025,OP-02,2026-08-17T10:58:02Z,Trenching,Cloudy,Expert,7,55,60
-T062,OP-05,2026-08-18T04:57:58Z,Material Loading,Sunny,Intermediate,2,37,39
-T188,OP-12,2026-08-18T09:33:29Z,Demolition,Sunny,Expert,8,79,80
-T117,OP-08,2026-08-18T15:45:44Z,Grading,Sunny,Intermediate,6,39,43
-T077,OP-06,2026-08-18T17:54:25Z,Material Loading,Windy,Expert,1,31,31
-T104,OP-07,2026-08-18T19:28:54Z,Material Loading,Rainy,Intermediate,3,36,42
-T155,OP-10,2026-08-19T05:11:28Z,Trenching,Windy,Intermediate,5,45,71
-T051,OP-04,2026-08-19T07:37:12Z,Material Loading,Rainy,Expert,1,38,37
-T215,OP-13,2026-08-19T22:41:06Z,Grading,Sunny,Intermediate,5,38,40
-T034,OP-03,2026-08-20T11:46:16Z,Material Loading,Cloudy,Expert,8,28,26
-T097,OP-07,2026-08-21T02:01:09Z,Demolition,Windy,Intermediate,1,92,107
-T174,OP-11,2026-08-21T14:13:01Z,Earth Excavation,Sunny,Intermediate,7,59,87
-T137,OP-09,2026-08-22T06:57:41Z,Demolition,Cloudy,Beginner,4,81,131
-T064,OP-05,2026-08-22T08:01:20Z,Trenching,Cloudy,Intermediate,9,51,56
-T091,OP-06,2026-08-22T14:01:25Z,Trenching,Cloudy,Expert,5,50,52
-T237,OP-15,2026-08-22T21:37:08Z,Material Loading,Windy,Intermediate,4,25,30
-T219,OP-14,2026-08-22T22:53:47Z,Trenching,Rainy,Expert,3,54,55
-T121,OP-08,2026-08-23T01:19:08Z,Trenching,Windy,Intermediate,2,49,57
-T008,OP-01,2026-08-23T07:58:25Z,Material Loading,Sunny,Expert,4,29,30
-T041,OP-03,2026-08-23T12:02:12Z,Earth Excavation,Sunny,Expert,1,58,53
-T207,OP-13,2026-08-23T12:50:25Z,Earth Excavation,Cloudy,Intermediate,3,56,62
-T086,OP-06,2026-08-23T20:11:07Z,Demolition,Windy,Expert,8,101,107
-T011,OP-01,2026-08-24T00:48:36Z,Trenching,Cloudy,Expert,3,51,47
-T145,OP-09,2026-08-24T05:50:57Z,Demolition,Cloudy,Beginner,10,93,171
-T122,OP-08,2026-08-25T07:58:30Z,Grading,Windy,Intermediate,5,45,54
-T160,OP-10,2026-08-25T10:29:19Z,Demolition,Rainy,Intermediate,5,85,114
-T140,OP-09,2026-08-25T16:36:36Z,Earth Excavation,Sunny,Beginner,5,47,79
-T039,OP-03,2026-08-26T00:09:26Z,Material Loading,Windy,Expert,7,31,33
-T087,OP-06,2026-08-26T13:19:07Z,Trenching,Windy,Expert,9,38,38
-T154,OP-10,2026-08-26T17:33:29Z,Grading,Cloudy,Intermediate,1,33,38
-T092,OP-06,2026-08-26T22:44:38Z,Demolition,Cloudy,Expert,9,94,102
-T040,OP-03,2026-08-27T02:57:57Z,Grading,Windy,Expert,8,39,41
-T169,OP-11,2026-08-27T05:27:37Z,Trenching,Windy,Intermediate,8,53,86
-T038,OP-03,2026-08-27T09:00:31Z,Trenching,Cloudy,Expert,9,49,54
-T080,OP-06,2026-08-28T05:32:53Z,Trenching,Rainy,Expert,5,45,51
-T023,OP-02,2026-08-28T06:06:51Z,Earth Excavation,Sunny,Expert,10,53,54
-T019,OP-02,2026-08-28T07:38:47Z,Earth Excavation,Sunny,Expert,3,40,34
-T085,OP-06,2026-08-28T10:01:10Z,Demolition,Sunny,Expert,7,83,85
-T042,OP-03,2026-08-28T11:38:43Z,Grading,Rainy,Expert,5,43,40
-T177,OP-11,2026-08-28T18:49:45Z,Earth Excavation,Sunny,Intermediate,8,50,70
-T211,OP-13,2026-08-28T20:23:12Z,Grading,Sunny,Intermediate,7,48,53
-T114,OP-07,2026-08-29T00:19:41Z,Demolition,Rainy,Intermediate,7,90,118
-T103,OP-07,2026-08-29T01:11:35Z,Earth Excavation,Cloudy,Intermediate,8,58,62
-T230,OP-14,2026-08-29T01:41:37Z,Material Loading,Cloudy,Expert,9,36,38
-T018,OP-02,2026-08-29T10:52:59Z,Grading,Sunny,Expert,10,40,39
-T171,OP-11,2026-08-31T01:49:03Z,Material Loading,Cloudy,Intermediate,4,27,38
-T149,OP-10,2026-08-31T01:55:07Z,Material Loading,Cloudy,Intermediate,7,32,42
-T227,OP-14,2026-08-31T02:01:40Z,Trenching,Cloudy,Expert,1,41,42
-T241,OP-15,2026-08-31T08:44:36Z,Grading,Windy,Intermediate,6,43,48
-T179,OP-11,2026-08-31T09:09:38Z,Material Loading,Rainy,Intermediate,8,31,44
-T153,OP-10,2026-08-31T09:33:00Z,Trenching,Rainy,Intermediate,8,44,63
-T128,OP-08,2026-08-31T09:53:15Z,Earth Excavation,Sunny,Intermediate,5,50,57
-T060,OP-04,2026-08-31T14:24:34Z,Material Loading,Windy,Expert,10,36,37
-T157,OP-10,2026-08-31T16:51:00Z,Material Loading,Windy,Intermediate,2,31,41
-T088,OP-06,2026-08-31T21:31:01Z,Earth Excavation,Windy,Expert,5,52,53
-T173,OP-11,2026-09-01T05:48:11Z,Grading,Sunny,Intermediate,9,35,44
-T185,OP-12,2026-09-01T19:55:54Z,Demolition,Windy,Expert,8,84,107
-T093,OP-06,2026-09-02T09:58:33Z,Trenching,Sunny,Expert,1,51,50
-T075,OP-05,2026-09-02T16:07:40Z,Grading,Cloudy,Intermediate,6,37,43
-T061,OP-05,2026-09-03T07:51:51Z,Earth Excavation,Cloudy,Intermediate,10,50,60
-T049,OP-04,2026-09-03T09:08:48Z,Earth Excavation,Cloudy,Expert,1,51,46
-T203,OP-13,2026-09-03T12:19:44Z,Material Loading,Sunny,Intermediate,8,42,43
-T112,OP-07,2026-09-03T17:55:06Z,Earth Excavation,Cloudy,Intermediate,10,57,72
-T118,OP-08,2026-09-03T23:23:00Z,Grading,Rainy,Intermediate,8,40,52
-T116,OP-08,2026-09-04T05:42:19Z,Material Loading,Sunny,Intermediate,3,29,30
-T115,OP-08,2026-09-04T08:13:12Z,Trenching,Rainy,Intermediate,2,53,54
-T190,OP-12,2026-09-04T17:32:56Z,Trenching,Cloudy,Expert,7,48,45
-T138,OP-09,2026-09-04T18:36:12Z,Material Loading,Cloudy,Beginner,7,33,53
-T186,OP-12,2026-09-04T20:32:05Z,Grading,Sunny,Expert,2,34,31
-T148,OP-10,2026-09-05T06:28:00Z,Grading,Sunny,Intermediate,1,30,33
-T213,OP-13,2026-09-05T18:55:35Z,Grading,Windy,Intermediate,9,40,50
-T200,OP-13,2026-09-05T22:16:38Z,Grading,Rainy,Intermediate,4,30,34
-T107,OP-07,2026-09-06T04:43:31Z,Earth Excavation,Rainy,Intermediate,5,56,71
-T150,OP-10,2026-09-06T05:37:03Z,Material Loading,Sunny,Intermediate,8,28,38
-T072,OP-05,2026-09-06T07:01:25Z,Material Loading,Windy,Intermediate,4,26,32
-T166,OP-11,2026-09-06T08:31:07Z,Trenching,Sunny,Intermediate,10,54,76
-T193,OP-12,2026-09-06T12:22:11Z,Grading,Rainy,Expert,9,43,46
-T167,OP-11,2026-09-06T12:42:46Z,Trenching,Cloudy,Intermediate,8,49,73
-T009,OP-01,2026-09-06T13:22:35Z,Earth Excavation,Cloudy,Expert,1,62,57
-T180,OP-11,2026-09-07T01:01:43Z,Material Loading,Windy,Intermediate,8,32,42
-T229,OP-14,2026-09-07T18:30:49Z,Material Loading,Cloudy,Expert,5,35,31
-T110,OP-07,2026-09-08T01:39:06Z,Material Loading,Sunny,Intermediate,5,36,38
-T135,OP-09,2026-09-08T02:47:12Z,Earth Excavation,Windy,Beginner,4,50,89
-T056,OP-04,2026-09-08T03:53:32Z,Demolition,Sunny,Expert,6,82,85
-T133,OP-08,2026-09-08T06:23:46Z,Trenching,Rainy,Intermediate,1,31,34
-T124,OP-08,2026-09-08T10:46:24Z,Trenching,Rainy,Intermediate,7,42,43
-T032,OP-02,2026-09-08T14:39:03Z,Material Loading,Cloudy,Expert,5,27,25
-T022,OP-02,2026-09-08T16:17:05Z,Trenching,Cloudy,Expert,6,34,32
-T105,OP-07,2026-09-08T16:55:46Z,Demolition,Rainy,Intermediate,5,89,96
-T139,OP-09,2026-09-08T21:39:28Z,Earth Excavation,Windy,Beginner,9,64,112
-T189,OP-12,2026-09-09T15:00:44Z,Material Loading,Cloudy,Expert,3,25,22
-T076,OP-05,2026-09-09T16:29:48Z,Earth Excavation,Windy,Intermediate,2,67,70
-T090,OP-06,2026-09-09T16:51:06Z,Material Loading,Sunny,Expert,3,36,34
-T248,OP-15,2026-09-10T00:07:42Z,Earth Excavation,Rainy,Intermediate,8,55,62
-T096,OP-06,2026-09-10T01:12:04Z,Earth Excavation,Cloudy,Expert,9,46,45
-T027,OP-02,2026-09-10T02:37:00Z,Trenching,Cloudy,Expert,8,47,51
-T187,OP-12,2026-09-10T02:39:52Z,Grading,Cloudy,Expert,9,44,50
-T079,OP-06,2026-09-10T10:51:19Z,Trenching,Windy,Expert,10,51,58
-T136,OP-09,2026-09-10T12:05:47Z,Earth Excavation,Sunny,Beginner,9,53,85
-T146,OP-10,2026-09-11T00:56:42Z,Earth Excavation,Cloudy,Intermediate,5,53,68
-T141,OP-09,2026-09-11T10:49:41Z,Demolition,Sunny,Beginner,9,80,130
-T143,OP-09,2026-09-11T20:26:15Z,Material Loading,Windy,Beginner,2,32,52
-T152,OP-10,2026-09-11T21:46:31Z,Grading,Cloudy,Intermediate,4,37,46
-T119,OP-08,2026-09-11T23:49:55Z,Demolition,Windy,Intermediate,10,106,130
-T003,OP-01,2026-09-12T05:21:49Z,Trenching,Cloudy,Expert,1,36,34
-T106,OP-07,2026-09-12T07:03:44Z,Earth Excavation,Windy,Intermediate,1,63,71
-T100,OP-07,2026-09-12T09:09:10Z,Earth Excavation,Rainy,Intermediate,10,56,74
-T017,OP-02,2026-09-12T14:10:54Z,Earth Excavation,Sunny,Expert,2,47,41
-T134,OP-09,2026-09-12T23:07:19Z,Trenching,Sunny,Beginner,4,49,75
-T156,OP-10,2026-09-13T08:07:51Z,Material Loading,Rainy,Intermediate,8,28,39
-T182,OP-12,2026-09-13T08:15:32Z,Earth Excavation,Windy,Expert,5,55,58
-T033,OP-03,2026-09-13T17:54:34Z,Earth Excavation,Rainy,Expert,5,48,49
-T047,OP-03,2026-09-13T22:26:58Z,Demolition,Cloudy,Expert,7,92,96
-T216,OP-14,2026-09-13T23:07:24Z,Grading,Cloudy,Expert,1,49,45
-T159,OP-10,2026-09-14T09:03:27Z,Trenching,Cloudy,Intermediate,3,43,53
-T013,OP-01,2026-09-14T13:06:30Z,Grading,Sunny,Expert,4,43,39
-T214,OP-13,2026-09-14T13:37:43Z,Earth Excavation,Rainy,Intermediate,3,65,67
-T222,OP-14,2026-09-14T18:50:27Z,Material Loading,Rainy,Expert,4,32,35
-T016,OP-02,2026-09-15T06:36:30Z,Trenching,Rainy,Expert,6,41,42
-T083,OP-06,2026-09-15T10:05:22Z,Trenching,Cloudy,Expert,5,45,45
-T223,OP-14,2026-09-15T11:16:55Z,Grading,Windy,Expert,3,34,33
-T144,OP-09,2026-09-15T11:21:08Z,Material Loading,Rainy,Beginner,8,28,53
-T161,OP-10,2026-09-15T17:06:11Z,Earth Excavation,Rainy,Intermediate,4,50,69
-T201,OP-13,2026-09-16T02:14:59Z,Trenching,Cloudy,Intermediate,1,44,43
-T070,OP-05,2026-09-17T17:10:38Z,Material Loading,Rainy,Intermediate,5,27,28
-T209,OP-13,2026-09-17T19:08:54Z,Earth Excavation,Sunny,Intermediate,1,56,55
-T240,OP-15,2026-09-17T19:12:49Z,Material Loading,Rainy,Intermediate,6,34,43
-T158,OP-10,2026-09-17T22:23:32Z,Earth Excavation,Windy,Intermediate,6,62,88
-T232,OP-15,2026-09-18T05:00:56Z,Trenching,Sunny,Intermediate,5,43,43
-T015,OP-02,2026-09-18T08:51:34Z,Grading,Sunny,Expert,1,29,32
-T178,OP-11,2026-09-18T12:14:56Z,Earth Excavation,Cloudy,Intermediate,1,53,58
-T020,OP-02,2026-09-19T01:44:24Z,Material Loading,Windy,Expert,9,33,31
-T210,OP-13,2026-09-19T04:02:27Z,Grading,Windy,Intermediate,8,41,55
-T109,OP-07,2026-09-19T22:15:46Z,Earth Excavation,Sunny,Intermediate,10,50,59
-T046,OP-03,2026-09-20T05:03:25Z,Demolition,Rainy,Expert,10,94,92
-T243,OP-15,2026-09-20T12:58:30Z,Material Loading,Sunny,Intermediate,6,41,43
-T111,OP-07,2026-09-20T13:19:00Z,Material Loading,Rainy,Intermediate,10,30,35
-T065,OP-05,2026-09-20T18:00:16Z,Earth Excavation,Cloudy,Intermediate,4,60,61
-T181,OP-11,2026-09-20T20:42:52Z,Demolition,Rainy,Intermediate,10,88,132
-T228,OP-14,2026-09-21T11:28:12Z,Material Loading,Rainy,Expert,10,37,47
-T176,OP-11,2026-09-22T03:18:33Z,Earth Excavation,Windy,Intermediate,3,60,70
-T168,OP-11,2026-09-22T04:01:19Z,Material Loading,Cloudy,Intermediate,3,23,30
-T084,OP-06,2026-09-22T09:34:37Z,Trenching,Cloudy,Expert,10,53,59
-T247,OP-15,2026-09-22T12:11:15Z,Material Loading,Sunny,Intermediate,1,27,32
-T078,OP-06,2026-09-22T20:26:12Z,Trenching,Cloudy,Expert,3,39,33
-T031,OP-02,2026-09-22T23:53:42Z,Material Loading,Windy,Expert,2,33,34
-T054,OP-04,2026-09-23T06:45:55Z,Demolition,Windy,Expert,2,90,100
-T071,OP-05,2026-09-23T06:47:11Z,Earth Excavation,Sunny,Intermediate,10,57,69
-T004,OP-01,2026-09-23T13:16:29Z,Trenching,Windy,Expert,2,40,41
-T043,OP-03,2026-09-23T13:45:17Z,Grading,Cloudy,Expert,7,35,34
-T170,OP-11,2026-09-24T10:25:45Z,Grading,Windy,Intermediate,3,44,51
+task_id,machine_id,operator_id,timestamp,task_type,weather,operator_skill,machine_age_yrs,estimated_time_min,actual_time_min
+T057,M-01,OP-04,2026-07-26T21:59:44Z,Material Loading,Windy,Expert,7,31,37
+T094,M-07,OP-06,2026-07-27T18:50:08Z,Earth Excavation,Sunny,Expert,5,46,41
+T101,M-02,OP-07,2026-07-27T18:57:03Z,Earth Excavation,Windy,Intermediate,9,50,62
+T005,M-09,OP-01,2026-07-27T23:15:38Z,Trenching,Cloudy,Expert,6,52,51
+T029,M-09,OP-02,2026-07-29T00:40:01Z,Grading,Sunny,Expert,3,37,35
+T125,M-04,OP-08,2026-07-29T04:25:42Z,Earth Excavation,Cloudy,Intermediate,4,70,80
+T126,M-09,OP-08,2026-07-29T07:49:46Z,Earth Excavation,Rainy,Intermediate,8,54,66
+T002,M-06,OP-01,2026-07-29T16:51:17Z,Trenching,Sunny,Expert,5,50,48
+T014,M-08,OP-01,2026-07-29T17:40:00Z,Earth Excavation,Rainy,Expert,3,48,53
+T037,M-03,OP-03,2026-07-30T01:39:08Z,Trenching,Windy,Expert,4,39,43
+T204,M-07,OP-13,2026-07-30T02:40:58Z,Grading,Windy,Intermediate,5,35,39
+T024,M-08,OP-02,2026-07-30T04:07:19Z,Trenching,Cloudy,Expert,9,43,44
+T165,M-08,OP-11,2026-07-30T06:53:32Z,Demolition,Sunny,Intermediate,9,91,135
+T129,M-03,OP-08,2026-07-30T07:47:34Z,Earth Excavation,Rainy,Intermediate,5,56,66
+T208,M-05,OP-13,2026-07-30T23:08:42Z,Demolition,Sunny,Intermediate,1,99,105
+T199,M-03,OP-13,2026-07-31T02:01:23Z,Trenching,Sunny,Intermediate,1,51,50
+T010,M-02,OP-01,2026-07-31T03:56:16Z,Material Loading,Windy,Expert,6,33,36
+T006,M-01,OP-01,2026-07-31T11:25:49Z,Demolition,Windy,Expert,10,89,94
+T191,M-09,OP-12,2026-07-31T11:56:04Z,Trenching,Windy,Expert,7,40,39
+T059,M-07,OP-04,2026-07-31T23:05:26Z,Demolition,Windy,Expert,4,104,100
+T035,M-08,OP-03,2026-07-31T23:36:49Z,Trenching,Cloudy,Expert,6,46,48
+T244,M-06,OP-15,2026-08-01T06:04:42Z,Demolition,Cloudy,Intermediate,9,84,101
+T246,M-06,OP-15,2026-08-02T04:43:25Z,Demolition,Sunny,Intermediate,4,82,91
+T234,M-06,OP-15,2026-08-02T18:36:31Z,Grading,Rainy,Intermediate,7,47,55
+T089,M-05,OP-06,2026-08-02T19:26:00Z,Earth Excavation,Windy,Expert,2,54,55
+T221,M-01,OP-14,2026-08-02T21:30:01Z,Material Loading,Windy,Expert,3,24,24
+T212,M-08,OP-13,2026-08-03T05:10:34Z,Demolition,Cloudy,Intermediate,10,88,88
+T067,M-06,OP-05,2026-08-03T05:20:15Z,Earth Excavation,Sunny,Intermediate,7,49,61
+T120,M-06,OP-08,2026-08-03T07:27:52Z,Material Loading,Windy,Intermediate,4,36,38
+T238,M-03,OP-15,2026-08-03T15:38:05Z,Grading,Cloudy,Intermediate,10,43,49
+T102,M-02,OP-07,2026-08-03T18:55:40Z,Material Loading,Rainy,Intermediate,7,23,31
+T108,M-04,OP-07,2026-08-04T00:13:57Z,Earth Excavation,Sunny,Intermediate,9,58,59
+T183,M-10,OP-12,2026-08-04T01:24:47Z,Grading,Rainy,Expert,6,42,48
+T113,M-04,OP-07,2026-08-04T11:04:48Z,Trenching,Rainy,Intermediate,5,50,57
+T021,M-07,OP-02,2026-08-04T11:05:37Z,Demolition,Cloudy,Expert,4,83,81
+T063,M-07,OP-05,2026-08-04T12:17:37Z,Demolition,Windy,Intermediate,3,89,112
+T055,M-06,OP-04,2026-08-04T15:11:39Z,Material Loading,Cloudy,Expert,9,26,24
+T172,M-03,OP-11,2026-08-05T03:32:30Z,Material Loading,Rainy,Intermediate,8,19,30
+T218,M-08,OP-14,2026-08-05T17:00:40Z,Demolition,Windy,Expert,10,97,107
+T132,M-04,OP-08,2026-08-05T19:32:23Z,Earth Excavation,Cloudy,Intermediate,1,51,55
+T196,M-04,OP-12,2026-08-05T22:55:57Z,Demolition,Sunny,Expert,8,88,101
+T098,M-09,OP-07,2026-08-06T03:07:08Z,Earth Excavation,Sunny,Intermediate,9,53,57
+T164,M-05,OP-11,2026-08-06T06:08:16Z,Trenching,Cloudy,Intermediate,9,54,68
+T082,M-06,OP-06,2026-08-06T06:49:05Z,Trenching,Cloudy,Expert,3,48,44
+T026,M-02,OP-02,2026-08-06T11:34:40Z,Demolition,Sunny,Expert,1,94,95
+T028,M-02,OP-02,2026-08-06T11:47:30Z,Trenching,Rainy,Expert,1,43,46
+T066,M-01,OP-05,2026-08-06T18:21:32Z,Demolition,Sunny,Intermediate,9,93,93
+T206,M-09,OP-13,2026-08-07T10:32:50Z,Grading,Cloudy,Intermediate,9,33,38
+T235,M-02,OP-15,2026-08-07T11:58:03Z,Grading,Cloudy,Intermediate,2,44,45
+T226,M-06,OP-14,2026-08-08T10:47:56Z,Trenching,Cloudy,Expert,1,36,35
+T198,M-02,OP-13,2026-08-08T12:25:09Z,Demolition,Cloudy,Intermediate,8,100,121
+T044,M-08,OP-03,2026-08-08T13:05:48Z,Trenching,Rainy,Expert,6,56,70
+T233,M-04,OP-15,2026-08-08T16:07:23Z,Material Loading,Rainy,Intermediate,2,28,33
+T162,M-04,OP-11,2026-08-08T17:08:14Z,Grading,Windy,Intermediate,2,36,50
+T052,M-09,OP-04,2026-08-09T00:29:46Z,Demolition,Cloudy,Expert,5,83,73
+T131,M-08,OP-08,2026-08-09T00:47:59Z,Trenching,Rainy,Intermediate,7,51,60
+T202,M-07,OP-13,2026-08-09T04:22:37Z,Earth Excavation,Rainy,Intermediate,8,45,51
+T231,M-02,OP-14,2026-08-09T06:26:39Z,Trenching,Cloudy,Expert,7,33,31
+T074,M-05,OP-05,2026-08-09T10:23:47Z,Material Loading,Cloudy,Intermediate,5,39,41
+T036,M-02,OP-03,2026-08-09T14:02:26Z,Demolition,Windy,Expert,8,100,125
+T099,M-08,OP-07,2026-08-09T16:41:20Z,Demolition,Rainy,Intermediate,6,93,131
+T239,M-09,OP-15,2026-08-10T01:34:25Z,Demolition,Sunny,Intermediate,8,94,92
+T127,M-02,OP-08,2026-08-10T06:57:42Z,Grading,Sunny,Intermediate,2,34,37
+T184,M-05,OP-12,2026-08-10T12:32:27Z,Earth Excavation,Rainy,Expert,5,55,63
+T175,M-01,OP-11,2026-08-10T16:15:47Z,Trenching,Cloudy,Intermediate,8,45,65
+T069,M-09,OP-05,2026-08-10T18:27:44Z,Material Loading,Rainy,Intermediate,7,38,48
+T142,M-03,OP-09,2026-08-11T01:43:09Z,Demolition,Sunny,Beginner,5,89,148
+T048,M-01,OP-03,2026-08-11T07:31:29Z,Demolition,Cloudy,Expert,3,94,83
+T205,M-09,OP-13,2026-08-11T12:35:43Z,Grading,Windy,Intermediate,2,49,56
+T147,M-10,OP-10,2026-08-12T14:43:41Z,Grading,Cloudy,Intermediate,3,30,38
+T130,M-05,OP-08,2026-08-12T17:38:11Z,Earth Excavation,Sunny,Intermediate,3,55,59
+T001,M-08,OP-01,2026-08-13T00:57:47Z,Material Loading,Rainy,Expert,10,31,35
+T225,M-06,OP-14,2026-08-13T06:44:50Z,Demolition,Cloudy,Expert,8,97,98
+T058,M-01,OP-04,2026-08-13T08:09:42Z,Earth Excavation,Windy,Expert,8,51,51
+T123,M-05,OP-08,2026-08-13T09:54:12Z,Earth Excavation,Cloudy,Intermediate,3,53,55
+T151,M-03,OP-10,2026-08-13T11:06:00Z,Demolition,Cloudy,Intermediate,7,84,115
+T007,M-03,OP-01,2026-08-13T13:42:37Z,Grading,Rainy,Expert,1,39,38
+T236,M-03,OP-15,2026-08-13T19:52:20Z,Trenching,Windy,Intermediate,8,50,54
+T045,M-02,OP-03,2026-08-13T20:27:12Z,Trenching,Cloudy,Expert,6,48,52
+T242,M-10,OP-15,2026-08-14T06:35:27Z,Earth Excavation,Rainy,Intermediate,9,58,79
+T192,M-03,OP-12,2026-08-14T07:05:21Z,Earth Excavation,Rainy,Expert,6,46,48
+T050,M-03,OP-04,2026-08-14T10:38:33Z,Trenching,Sunny,Expert,6,43,47
+T030,M-06,OP-02,2026-08-14T12:43:58Z,Grading,Sunny,Expert,5,30,30
+T163,M-06,OP-11,2026-08-14T14:44:06Z,Grading,Windy,Intermediate,9,42,70
+T197,M-05,OP-13,2026-08-14T16:21:30Z,Material Loading,Sunny,Intermediate,5,30,33
+T068,M-07,OP-05,2026-08-14T19:00:53Z,Material Loading,Rainy,Intermediate,9,28,33
+T095,M-05,OP-06,2026-08-15T00:55:52Z,Demolition,Sunny,Expert,8,90,80
+T217,M-05,OP-14,2026-08-15T04:53:21Z,Material Loading,Rainy,Expert,2,41,41
+T220,M-10,OP-14,2026-08-15T12:47:17Z,Material Loading,Cloudy,Expert,1,37,39
+T224,M-02,OP-14,2026-08-15T13:54:46Z,Grading,Cloudy,Expert,4,44,40
+T245,M-01,OP-15,2026-08-16T03:58:01Z,Earth Excavation,Rainy,Intermediate,6,50,67
+T073,M-10,OP-05,2026-08-16T11:44:06Z,Demolition,Cloudy,Intermediate,2,85,94
+T194,M-08,OP-12,2026-08-16T12:27:12Z,Grading,Cloudy,Expert,8,42,42
+T195,M-06,OP-12,2026-08-16T17:37:21Z,Grading,Windy,Expert,10,45,52
+T081,M-08,OP-06,2026-08-16T18:56:52Z,Earth Excavation,Rainy,Expert,5,51,52
+T053,M-01,OP-04,2026-08-16T19:09:01Z,Trenching,Cloudy,Expert,2,47,48
+T012,M-02,OP-01,2026-08-16T21:14:18Z,Material Loading,Sunny,Expert,6,33,33
+T025,M-03,OP-02,2026-08-17T10:58:02Z,Trenching,Cloudy,Expert,7,55,60
+T062,M-09,OP-05,2026-08-18T04:57:58Z,Material Loading,Sunny,Intermediate,2,37,39
+T188,M-08,OP-12,2026-08-18T09:33:29Z,Demolition,Sunny,Expert,8,79,80
+T117,M-06,OP-08,2026-08-18T15:45:44Z,Grading,Sunny,Intermediate,6,39,43
+T077,M-09,OP-06,2026-08-18T17:54:25Z,Material Loading,Windy,Expert,1,31,31
+T104,M-04,OP-07,2026-08-18T19:28:54Z,Material Loading,Rainy,Intermediate,3,36,42
+T155,M-10,OP-10,2026-08-19T05:11:28Z,Trenching,Windy,Intermediate,5,45,71
+T051,M-02,OP-04,2026-08-19T07:37:12Z,Material Loading,Rainy,Expert,1,38,37
+T215,M-06,OP-13,2026-08-19T22:41:06Z,Grading,Sunny,Intermediate,5,38,40
+T034,M-01,OP-03,2026-08-20T11:46:16Z,Material Loading,Cloudy,Expert,8,28,26
+T097,M-06,OP-07,2026-08-21T02:01:09Z,Demolition,Windy,Intermediate,1,92,107
+T174,M-07,OP-11,2026-08-21T14:13:01Z,Earth Excavation,Sunny,Intermediate,7,59,87
+T137,M-06,OP-09,2026-08-22T06:57:41Z,Demolition,Cloudy,Beginner,4,81,131
+T064,M-05,OP-05,2026-08-22T08:01:20Z,Trenching,Cloudy,Intermediate,9,51,56
+T091,M-05,OP-06,2026-08-22T14:01:25Z,Trenching,Cloudy,Expert,5,50,52
+T237,M-07,OP-15,2026-08-22T21:37:08Z,Material Loading,Windy,Intermediate,4,25,30
+T219,M-05,OP-14,2026-08-22T22:53:47Z,Trenching,Rainy,Expert,3,54,55
+T121,M-09,OP-08,2026-08-23T01:19:08Z,Trenching,Windy,Intermediate,2,49,57
+T008,M-01,OP-01,2026-08-23T07:58:25Z,Material Loading,Sunny,Expert,4,29,30
+T041,M-04,OP-03,2026-08-23T12:02:12Z,Earth Excavation,Sunny,Expert,1,58,53
+T207,M-10,OP-13,2026-08-23T12:50:25Z,Earth Excavation,Cloudy,Intermediate,3,56,62
+T086,M-04,OP-06,2026-08-23T20:11:07Z,Demolition,Windy,Expert,8,101,107
+T011,M-10,OP-01,2026-08-24T00:48:36Z,Trenching,Cloudy,Expert,3,51,47
+T145,M-10,OP-09,2026-08-24T05:50:57Z,Demolition,Cloudy,Beginner,10,93,171
+T122,M-09,OP-08,2026-08-25T07:58:30Z,Grading,Windy,Intermediate,5,45,54
+T160,M-07,OP-10,2026-08-25T10:29:19Z,Demolition,Rainy,Intermediate,5,85,114
+T140,M-03,OP-09,2026-08-25T16:36:36Z,Earth Excavation,Sunny,Beginner,5,47,79
+T039,M-05,OP-03,2026-08-26T00:09:26Z,Material Loading,Windy,Expert,7,31,33
+T087,M-03,OP-06,2026-08-26T13:19:07Z,Trenching,Windy,Expert,9,38,38
+T154,M-06,OP-10,2026-08-26T17:33:29Z,Grading,Cloudy,Intermediate,1,33,38
+T092,M-03,OP-06,2026-08-26T22:44:38Z,Demolition,Cloudy,Expert,9,94,102
+T040,M-09,OP-03,2026-08-27T02:57:57Z,Grading,Windy,Expert,8,39,41
+T169,M-03,OP-11,2026-08-27T05:27:37Z,Trenching,Windy,Intermediate,8,53,86
+T038,M-06,OP-03,2026-08-27T09:00:31Z,Trenching,Cloudy,Expert,9,49,54
+T080,M-09,OP-06,2026-08-28T05:32:53Z,Trenching,Rainy,Expert,5,45,51
+T023,M-06,OP-02,2026-08-28T06:06:51Z,Earth Excavation,Sunny,Expert,10,53,54
+T019,M-03,OP-02,2026-08-28T07:38:47Z,Earth Excavation,Sunny,Expert,3,40,34
+T085,M-03,OP-06,2026-08-28T10:01:10Z,Demolition,Sunny,Expert,7,83,85
+T042,M-10,OP-03,2026-08-28T11:38:43Z,Grading,Rainy,Expert,5,43,40
+T177,M-06,OP-11,2026-08-28T18:49:45Z,Earth Excavation,Sunny,Intermediate,8,50,70
+T211,M-05,OP-13,2026-08-28T20:23:12Z,Grading,Sunny,Intermediate,7,48,53
+T114,M-02,OP-07,2026-08-29T00:19:41Z,Demolition,Rainy,Intermediate,7,90,118
+T103,M-09,OP-07,2026-08-29T01:11:35Z,Earth Excavation,Cloudy,Intermediate,8,58,62
+T230,M-01,OP-14,2026-08-29T01:41:37Z,Material Loading,Cloudy,Expert,9,36,38
+T018,M-05,OP-02,2026-08-29T10:52:59Z,Grading,Sunny,Expert,10,40,39
+T171,M-03,OP-11,2026-08-31T01:49:03Z,Material Loading,Cloudy,Intermediate,4,27,38
+T149,M-06,OP-10,2026-08-31T01:55:07Z,Material Loading,Cloudy,Intermediate,7,32,42
+T227,M-05,OP-14,2026-08-31T02:01:40Z,Trenching,Cloudy,Expert,1,41,42
+T241,M-01,OP-15,2026-08-31T08:44:36Z,Grading,Windy,Intermediate,6,43,48
+T179,M-03,OP-11,2026-08-31T09:09:38Z,Material Loading,Rainy,Intermediate,8,31,44
+T153,M-06,OP-10,2026-08-31T09:33:00Z,Trenching,Rainy,Intermediate,8,44,63
+T128,M-07,OP-08,2026-08-31T09:53:15Z,Earth Excavation,Sunny,Intermediate,5,50,57
+T060,M-05,OP-04,2026-08-31T14:24:34Z,Material Loading,Windy,Expert,10,36,37
+T157,M-05,OP-10,2026-08-31T16:51:00Z,Material Loading,Windy,Intermediate,2,31,41
+T088,M-01,OP-06,2026-08-31T21:31:01Z,Earth Excavation,Windy,Expert,5,52,53
+T173,M-05,OP-11,2026-09-01T05:48:11Z,Grading,Sunny,Intermediate,9,35,44
+T185,M-08,OP-12,2026-09-01T19:55:54Z,Demolition,Windy,Expert,8,84,107
+T093,M-03,OP-06,2026-09-02T09:58:33Z,Trenching,Sunny,Expert,1,51,50
+T075,M-01,OP-05,2026-09-02T16:07:40Z,Grading,Cloudy,Intermediate,6,37,43
+T061,M-10,OP-05,2026-09-03T07:51:51Z,Earth Excavation,Cloudy,Intermediate,10,50,60
+T049,M-10,OP-04,2026-09-03T09:08:48Z,Earth Excavation,Cloudy,Expert,1,51,46
+T203,M-08,OP-13,2026-09-03T12:19:44Z,Material Loading,Sunny,Intermediate,8,42,43
+T112,M-08,OP-07,2026-09-03T17:55:06Z,Earth Excavation,Cloudy,Intermediate,10,57,72
+T118,M-02,OP-08,2026-09-03T23:23:00Z,Grading,Rainy,Intermediate,8,40,52
+T116,M-05,OP-08,2026-09-04T05:42:19Z,Material Loading,Sunny,Intermediate,3,29,30
+T115,M-07,OP-08,2026-09-04T08:13:12Z,Trenching,Rainy,Intermediate,2,53,54
+T190,M-03,OP-12,2026-09-04T17:32:56Z,Trenching,Cloudy,Expert,7,48,45
+T138,M-08,OP-09,2026-09-04T18:36:12Z,Material Loading,Cloudy,Beginner,7,33,53
+T186,M-01,OP-12,2026-09-04T20:32:05Z,Grading,Sunny,Expert,2,34,31
+T148,M-06,OP-10,2026-09-05T06:28:00Z,Grading,Sunny,Intermediate,1,30,33
+T213,M-10,OP-13,2026-09-05T18:55:35Z,Grading,Windy,Intermediate,9,40,50
+T200,M-03,OP-13,2026-09-05T22:16:38Z,Grading,Rainy,Intermediate,4,30,34
+T107,M-02,OP-07,2026-09-06T04:43:31Z,Earth Excavation,Rainy,Intermediate,5,56,71
+T150,M-01,OP-10,2026-09-06T05:37:03Z,Material Loading,Sunny,Intermediate,8,28,38
+T072,M-07,OP-05,2026-09-06T07:01:25Z,Material Loading,Windy,Intermediate,4,26,32
+T166,M-07,OP-11,2026-09-06T08:31:07Z,Trenching,Sunny,Intermediate,10,54,76
+T193,M-09,OP-12,2026-09-06T12:22:11Z,Grading,Rainy,Expert,9,43,46
+T167,M-07,OP-11,2026-09-06T12:42:46Z,Trenching,Cloudy,Intermediate,8,49,73
+T009,M-06,OP-01,2026-09-06T13:22:35Z,Earth Excavation,Cloudy,Expert,1,62,57
+T180,M-09,OP-11,2026-09-07T01:01:43Z,Material Loading,Windy,Intermediate,8,32,42
+T229,M-02,OP-14,2026-09-07T18:30:49Z,Material Loading,Cloudy,Expert,5,35,31
+T110,M-06,OP-07,2026-09-08T01:39:06Z,Material Loading,Sunny,Intermediate,5,36,38
+T135,M-08,OP-09,2026-09-08T02:47:12Z,Earth Excavation,Windy,Beginner,4,50,89
+T056,M-07,OP-04,2026-09-08T03:53:32Z,Demolition,Sunny,Expert,6,82,85
+T133,M-03,OP-08,2026-09-08T06:23:46Z,Trenching,Rainy,Intermediate,1,31,34
+T124,M-09,OP-08,2026-09-08T10:46:24Z,Trenching,Rainy,Intermediate,7,42,43
+T032,M-03,OP-02,2026-09-08T14:39:03Z,Material Loading,Cloudy,Expert,5,27,25
+T022,M-03,OP-02,2026-09-08T16:17:05Z,Trenching,Cloudy,Expert,6,34,32
+T105,M-04,OP-07,2026-09-08T16:55:46Z,Demolition,Rainy,Intermediate,5,89,96
+T139,M-08,OP-09,2026-09-08T21:39:28Z,Earth Excavation,Windy,Beginner,9,64,112
+T189,M-05,OP-12,2026-09-09T15:00:44Z,Material Loading,Cloudy,Expert,3,25,22
+T076,M-08,OP-05,2026-09-09T16:29:48Z,Earth Excavation,Windy,Intermediate,2,67,70
+T090,M-01,OP-06,2026-09-09T16:51:06Z,Material Loading,Sunny,Expert,3,36,34
+T248,M-08,OP-15,2026-09-10T00:07:42Z,Earth Excavation,Rainy,Intermediate,8,55,62
+T096,M-10,OP-06,2026-09-10T01:12:04Z,Earth Excavation,Cloudy,Expert,9,46,45
+T027,M-02,OP-02,2026-09-10T02:37:00Z,Trenching,Cloudy,Expert,8,47,51
+T187,M-08,OP-12,2026-09-10T02:39:52Z,Grading,Cloudy,Expert,9,44,50
+T079,M-03,OP-06,2026-09-10T10:51:19Z,Trenching,Windy,Expert,10,51,58
+T136,M-03,OP-09,2026-09-10T12:05:47Z,Earth Excavation,Sunny,Beginner,9,53,85
+T146,M-10,OP-10,2026-09-11T00:56:42Z,Earth Excavation,Cloudy,Intermediate,5,53,68
+T141,M-02,OP-09,2026-09-11T10:49:41Z,Demolition,Sunny,Beginner,9,80,130
+T143,M-08,OP-09,2026-09-11T20:26:15Z,Material Loading,Windy,Beginner,2,32,52
+T152,M-05,OP-10,2026-09-11T21:46:31Z,Grading,Cloudy,Intermediate,4,37,46
+T119,M-02,OP-08,2026-09-11T23:49:55Z,Demolition,Windy,Intermediate,10,106,130
+T003,M-10,OP-01,2026-09-12T05:21:49Z,Trenching,Cloudy,Expert,1,36,34
+T106,M-06,OP-07,2026-09-12T07:03:44Z,Earth Excavation,Windy,Intermediate,1,63,71
+T100,M-01,OP-07,2026-09-12T09:09:10Z,Earth Excavation,Rainy,Intermediate,10,56,74
+T017,M-01,OP-02,2026-09-12T14:10:54Z,Earth Excavation,Sunny,Expert,2,47,41
+T134,M-10,OP-09,2026-09-12T23:07:19Z,Trenching,Sunny,Beginner,4,49,75
+T156,M-10,OP-10,2026-09-13T08:07:51Z,Material Loading,Rainy,Intermediate,8,28,39
+T182,M-04,OP-12,2026-09-13T08:15:32Z,Earth Excavation,Windy,Expert,5,55,58
+T033,M-01,OP-03,2026-09-13T17:54:34Z,Earth Excavation,Rainy,Expert,5,48,49
+T047,M-01,OP-03,2026-09-13T22:26:58Z,Demolition,Cloudy,Expert,7,92,96
+T216,M-05,OP-14,2026-09-13T23:07:24Z,Grading,Cloudy,Expert,1,49,45
+T159,M-07,OP-10,2026-09-14T09:03:27Z,Trenching,Cloudy,Intermediate,3,43,53
+T013,M-01,OP-01,2026-09-14T13:06:30Z,Grading,Sunny,Expert,4,43,39
+T214,M-10,OP-13,2026-09-14T13:37:43Z,Earth Excavation,Rainy,Intermediate,3,65,67
+T222,M-02,OP-14,2026-09-14T18:50:27Z,Material Loading,Rainy,Expert,4,32,35
+T016,M-10,OP-02,2026-09-15T06:36:30Z,Trenching,Rainy,Expert,6,41,42
+T083,M-05,OP-06,2026-09-15T10:05:22Z,Trenching,Cloudy,Expert,5,45,45
+T223,M-01,OP-14,2026-09-15T11:16:55Z,Grading,Windy,Expert,3,34,33
+T144,M-05,OP-09,2026-09-15T11:21:08Z,Material Loading,Rainy,Beginner,8,28,53
+T161,M-01,OP-10,2026-09-15T17:06:11Z,Earth Excavation,Rainy,Intermediate,4,50,69
+T201,M-04,OP-13,2026-09-16T02:14:59Z,Trenching,Cloudy,Intermediate,1,44,43
+T070,M-03,OP-05,2026-09-17T17:10:38Z,Material Loading,Rainy,Intermediate,5,27,28
+T209,M-03,OP-13,2026-09-17T19:08:54Z,Earth Excavation,Sunny,Intermediate,1,56,55
+T240,M-01,OP-15,2026-09-17T19:12:49Z,Material Loading,Rainy,Intermediate,6,34,43
+T158,M-09,OP-10,2026-09-17T22:23:32Z,Earth Excavation,Windy,Intermediate,6,62,88
+T232,M-02,OP-15,2026-09-18T05:00:56Z,Trenching,Sunny,Intermediate,5,43,43
+T015,M-08,OP-02,2026-09-18T08:51:34Z,Grading,Sunny,Expert,1,29,32
+T178,M-10,OP-11,2026-09-18T12:14:56Z,Earth Excavation,Cloudy,Intermediate,1,53,58
+T020,M-02,OP-02,2026-09-19T01:44:24Z,Material Loading,Windy,Expert,9,33,31
+T210,M-07,OP-13,2026-09-19T04:02:27Z,Grading,Windy,Intermediate,8,41,55
+T109,M-09,OP-07,2026-09-19T22:15:46Z,Earth Excavation,Sunny,Intermediate,10,50,59
+T046,M-02,OP-03,2026-09-20T05:03:25Z,Demolition,Rainy,Expert,10,94,92
+T243,M-05,OP-15,2026-09-20T12:58:30Z,Material Loading,Sunny,Intermediate,6,41,43
+T111,M-03,OP-07,2026-09-20T13:19:00Z,Material Loading,Rainy,Intermediate,10,30,35
+T065,M-02,OP-05,2026-09-20T18:00:16Z,Earth Excavation,Cloudy,Intermediate,4,60,61
+T181,M-10,OP-11,2026-09-20T20:42:52Z,Demolition,Rainy,Intermediate,10,88,132
+T228,M-01,OP-14,2026-09-21T11:28:12Z,Material Loading,Rainy,Expert,10,37,47
+T176,M-05,OP-11,2026-09-22T03:18:33Z,Earth Excavation,Windy,Intermediate,3,60,70
+T168,M-10,OP-11,2026-09-22T04:01:19Z,Material Loading,Cloudy,Intermediate,3,23,30
+T084,M-01,OP-06,2026-09-22T09:34:37Z,Trenching,Cloudy,Expert,10,53,59
+T247,M-10,OP-15,2026-09-22T12:11:15Z,Material Loading,Sunny,Intermediate,1,27,32
+T078,M-01,OP-06,2026-09-22T20:26:12Z,Trenching,Cloudy,Expert,3,39,33
+T031,M-05,OP-02,2026-09-22T23:53:42Z,Material Loading,Windy,Expert,2,33,34
+T054,M-01,OP-04,2026-09-23T06:45:55Z,Demolition,Windy,Expert,2,90,100
+T071,M-04,OP-05,2026-09-23T06:47:11Z,Earth Excavation,Sunny,Intermediate,10,57,69
+T004,M-07,OP-01,2026-09-23T13:16:29Z,Trenching,Windy,Expert,2,40,41
+T043,M-03,OP-03,2026-09-23T13:45:17Z,Grading,Cloudy,Expert,7,35,34
+T170,M-09,OP-11,2026-09-24T10:25:45Z,Grading,Windy,Intermediate,3,44,51

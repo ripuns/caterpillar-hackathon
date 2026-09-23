@@ -1,19 +1,16 @@
 import { Controller, Get } from '@nestjs/common';
+import { DataLoaderService } from '../data/data-loader.service';
+import { RulesService } from '../rules/rules.service';
 
 @Controller('safety-alerts')
 export class SafetyController {
+  constructor(
+    private readonly dataLoader: DataLoaderService,
+    private readonly rules: RulesService,
+  ) {}
+
   @Get()
   findAll() {
-    return [
-      {
-        alertId: 'A001',
-        machineId: 'M-12',
-        operatorId: 'OP-04',
-        timestamp: '2026-09-24T08:15:00Z',
-        type: 'seatbelt',
-        message: 'Seatbelt unfastened while machine active',
-        severity: 'high',
-      },
-    ];
+    return this.rules.computeSafetyAlerts(this.dataLoader.getOperations());
   }
 }

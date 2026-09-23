@@ -1,20 +1,16 @@
 import { Controller, Get } from '@nestjs/common';
+import { DataLoaderService } from '../data/data-loader.service';
+import { RulesService } from '../rules/rules.service';
 
 @Controller('behavior-flags')
 export class BehaviorController {
+  constructor(
+    private readonly dataLoader: DataLoaderService,
+    private readonly rules: RulesService,
+  ) {}
+
   @Get()
   findAll() {
-    return [
-      {
-        flagId: 'F001',
-        machineId: 'M-12',
-        operatorId: 'OP-04',
-        timestamp: '2026-09-24T09:00:00Z',
-        type: 'excessive_idling',
-        value: 58,
-        threshold: 45,
-        message: 'Idling time 58 min exceeds 45 min threshold',
-      },
-    ];
+    return this.rules.computeBehaviorFlags(this.dataLoader.getOperations());
   }
 }
