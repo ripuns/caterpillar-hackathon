@@ -239,6 +239,8 @@ NestJS's `/health` pings FastAPI's `/health` with a 1-second timeout and reports
 
 ## 11. `GET /machines/:machineId/health` — Machine Health Score (Supports §7.4)
 
+**Implemented** (`backend/src/machines/machine-scoring.service.ts` + `machines.controller.ts`). Ported from Dev's `data-ml/machine_scoring.py`, verified byte-for-byte against `data-ml/outputs/machine_scores.json` for every machine.
+
 Response:
 ```json
 {
@@ -268,11 +270,11 @@ Computed by aggregating `operations.csv` per `machine_id` instead of per `operat
 
 ## 12. `GET /machines` — Fleet-Wide Machine Health List (Supports §7.4)
 
-Response: array of the same shape as §11, one entry per machine (10 total), for a fleet-overview dashboard view. Supports pagination — see §8.2.
+**Implemented.** Response: array of the same shape as §11, one entry per machine (10 total), for a fleet-overview dashboard view. Supports pagination — see §8.2.
 
 ## 13. `GET /machines/:machineId/zone-status` — Zone + Compound SOS Status (Supports README §7.5)
 
-**Draft — not yet implemented, confirm shape with the team before building.**
+**Implemented** (`backend/src/machines/zone-status.service.ts`). Ported from Dev's `data-ml/zone_status.py`, calls `MachineScoringService` internally rather than duplicating the scoring logic, verified against `data-ml/outputs/zone_status.json`. As noted in the merge Change Log entry, no machine in the current dataset triggers `sosActive: true` (lowest score is 56, threshold is 40) — this is a data-realism gap, not a logic bug; the response shape and compound-trigger logic are confirmed correct.
 
 Response:
 ```json
@@ -289,7 +291,7 @@ Response:
 
 ## 14. `GET /fleet/cost-summary` — Site-Wide Cost/ROI Rollup (Supports README §7.6)
 
-**Implemented** (`backend/src/fleet/cost-estimation.service.ts` + `fleet.controller.ts`). `topRiskMachines` and `machinesNearingServiceInterval` currently always return `[]` — they depend on the Machine Health Score (§11/§12), which is blocked on Dev's `machine_scoring.py` and not yet available. Wire those in once that exists; do not fabricate values in the meantime.
+**Implemented** (`backend/src/fleet/cost-estimation.service.ts` + `fleet.controller.ts`). `topRiskMachines` and `machinesNearingServiceInterval` are now wired to the Machine Health Score (§11/§12) — `topRiskMachines` ranks by `100 - score` (top 5, nonzero only); `machinesNearingServiceInterval` lists machines within 50 simulated engine hours of the service interval, each with a flat illustrative `estimatedDowntimeCostAvoided` (reuses `INCIDENT_COST_ESTIMATE`).
 
 Response (real example, from the actual synthetic dataset):
 ```json
@@ -301,9 +303,13 @@ Response (real example, from the actual synthetic dataset):
   "topRiskOperators": [
     { "operatorId": "OP-12", "estimatedCostImpact": 2663.43 }
   ],
-  "topRiskMachines": [],
-  "machinesNearingServiceInterval": [],
-  "note": "Cost figures are illustrative demo estimates, not sourced from real Caterpillar data. topRiskMachines and machinesNearingServiceInterval are empty pending the Machine Health Score (README §7.4)."
+  "topRiskMachines": [
+    { "machineId": "M-03", "estimatedCostImpact": 44 }
+  ],
+  "machinesNearingServiceInterval": [
+    { "machineId": "M-03", "estimatedDowntimeCostAvoided": 150 }
+  ],
+  "note": "Cost figures are illustrative demo estimates, not sourced from real Caterpillar data."
 }
 ```
 
@@ -455,3 +461,4 @@ Record any change made after the Hour 0:30 lock, so nobody works against a stale
 | — | Production hardening batch: implemented and verified §8.1 (validation), §8.3 (standard error shape), §8.6 (request-level logging), §8.8 (idempotency); §8.5 (circuit breaker) partial — `/health` exists but not yet consulted by `/predict-task-time`. Implemented `PATCH /tasks/:taskId` (§6, in-memory status overlay), `POST`/`GET /incidents` (§7/§8, includes live backfill of system incidents from safety alerts). Done now (before Anamika starts frontend integration) specifically so the API surface is stable when she begins wiring, rather than risking a contract change mid-integration. | Ripun |
 | — | **Completed remaining §8 items**, all verified: §8.2 pagination (`?page&pageSize` on all 4 list endpoints), §8.4 caching (30s TTL on `/operators/:id/summary`), §8.5 circuit breaker now fully wired (`MlServiceHealthService`, background-refreshed reachability, `PredictionController` skips the live call when down), §8.6's decision-level half (rule-firing + prediction audit logs, not just request logs), §8.7 auth (`x-api-key` guard on both write endpoints), §8.9 versioning (`/api/v1/` global prefix — **breaking change, every path now requires the prefix**). §8 is now fully implemented. | Ripun |
 | — | Merged Dev's `machine_scoring.py` + `zone_status.py` (data branch) into `backend`. Real Machine Health Score and zone/SOS computation now exist in `data-ml/`, documented in `data-ml/MACHINE_HEALTH_HANDOFF.md` (more detailed/authoritative than §11/§13 below — read that first). `current_zone` added to `operations.csv`. §11/§13 updated to match Dev's real component formulas and response shape. **Known gap, deliberately deferred, not fixed here:** no machine in the current dataset scores below the CRITICAL threshold (lowest is 56), so `sosActive` is `false` for all machines out of the box — confirmed as a data-realism outcome, not a logic bug, via Dev's synthetic worst-case test. Revisit before demo if a live SOS trigger needs to be shown — fix is contained to `data-ml/generate_data.py` (bias one machine's synthetic values), no backend/frontend changes required. | Ripun, after merging Dev's work |
+| — | **Ported Dev's `machine_scoring.py` and `zone_status.py` to NestJS**, implementing §11/§12/§13 (`backend/src/machines/`: `machine-scoring.service.ts`, `zone-status.service.ts`, `machines.controller.ts`, `score-status.ts`). Added `currentZone` to `DataLoaderService`'s `OperationRow`. Verified byte-for-byte against `data-ml/outputs/machine_scores.json` and `zone_status.json` for every machine (10/10 match, including the M-03/M-06 examples now used in §11/§13). Wired `topRiskMachines`/`machinesNearingServiceInterval` into `/fleet/cost-summary` (§14) using the new Machine Health Score — no longer returns `[]`. Confirmed §4.1 `POST /predict-safety-risk` has no corresponding model or scaffolding anywhere in `data-ml/` — correctly still unbuilt, deferred until Dev trains a risk model; not attempted here. | Ripun |

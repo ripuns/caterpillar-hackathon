@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OperationRow, TaskRow } from '../data/data-loader.service';
+import { MachineScoringService, SERVICE_INTERVAL_HOURS_THRESHOLD } from '../machines/machine-scoring.service';
 
 /**
  * Illustrative cost constants for the demo (README §7.6 / CONTRACTS.md §14).
@@ -43,6 +44,8 @@ export interface FleetCostSummary {
 
 @Injectable()
 export class CostEstimationService {
+  constructor(private readonly machineScoring: MachineScoringService) {}
+
   computeFleetSummary(operations: OperationRow[], tasks: TaskRow[]): FleetCostSummary {
     const totalIdlingMin = operations.reduce((sum, r) => sum + r.idlingTimeMin, 0);
     const totalIdleCostEstimate = Math.round(totalIdlingMin * IDLE_COST_PER_MIN * 100) / 100;
@@ -59,22 +62,61 @@ export class CostEstimationService {
     const totalIncidentCostEstimate = Math.round(totalIncidentCount * INCIDENT_COST_ESTIMATE * 100) / 100;
 
     const topRiskOperators = this.computeTopRiskOperators(operations, tasks);
+    const topRiskMachines = this.computeTopRiskMachines(operations);
+    const machinesNearingServiceInterval = this.computeMachinesNearingServiceInterval(operations);
 
-    // Machine-side risk (topRiskMachines, machinesNearingServiceInterval) requires
-    // the Machine Health Score (README §7.4), which is blocked on Dev's
-    // machine_scoring.py — not yet available. Returning empty arrays rather
-    // than fabricating numbers; wire these in once that data exists
-    // (EXECUTION_PLAN.md §6.4/§6.6).
     return {
       totalIdleCostEstimate,
       totalOverrunCostEstimate,
       totalIncidentCount,
       totalIncidentCostEstimate,
       topRiskOperators,
-      topRiskMachines: [],
-      machinesNearingServiceInterval: [],
-      note: 'Cost figures are illustrative demo estimates, not sourced from real Caterpillar data. topRiskMachines and machinesNearingServiceInterval are empty pending the Machine Health Score (README §7.4).',
+      topRiskMachines,
+      machinesNearingServiceInterval,
+      note: 'Cost figures are illustrative demo estimates, not sourced from real Caterpillar data.',
     };
+  }
+
+  private computeTopRiskMachines(
+    operations: OperationRow[],
+  ): Array<{ machineId: string; estimatedCostImpact: number }> {
+    const scores = this.machineScoring.computeAllMachineScores(operations);
+
+    return scores
+      .map((s) => ({
+        machineId: s.machineId,
+        // Lower score = higher risk. Inverted onto the same cost-impact
+        // framing as topRiskOperators so both lists sort descending by
+        // "how much attention this needs."
+        estimatedCostImpact: Math.round((100 - s.score) * 10) / 10,
+      }))
+      .sort((a, b) => b.estimatedCostImpact - a.estimatedCostImpact)
+      .slice(0, 5)
+      .filter((m) => m.estimatedCostImpact > 0);
+  }
+
+  private computeMachinesNearingServiceInterval(
+    operations: OperationRow[],
+  ): Array<{ machineId: string; estimatedDowntimeCostAvoided: number }> {
+    const machineIds = [...new Set(operations.map((r) => r.machineId))].sort();
+
+    return machineIds
+      .map((machineId) => {
+        const rows = operations.filter((r) => r.machineId === machineId);
+        const latest = [...rows].sort((a, b) => a.timestamp.localeCompare(b.timestamp))[rows.length - 1];
+        const hoursIntoInterval = latest.engineHours % SERVICE_INTERVAL_HOURS_THRESHOLD;
+        const hoursRemaining = SERVICE_INTERVAL_HOURS_THRESHOLD - hoursIntoInterval;
+        return { machineId, hoursRemaining };
+      })
+      .filter((m) => m.hoursRemaining <= 50) // within 50 engine hours of the simulated interval
+      .sort((a, b) => a.hoursRemaining - b.hoursRemaining)
+      .map((m) => ({
+        machineId: m.machineId,
+        // Illustrative avoided-downtime estimate: catching service proactively
+        // vs. a reactive breakdown, same order of magnitude as the incident
+        // cost estimate below — not a real CAT figure.
+        estimatedDowntimeCostAvoided: INCIDENT_COST_ESTIMATE,
+      }));
   }
 
   private computeTopRiskOperators(

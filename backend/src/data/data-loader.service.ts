@@ -15,6 +15,7 @@ export interface OperationRow {
   distanceToNearestObjectM: number;
   safetyAlertTriggered: 'Yes' | 'No';
   trainingCompletedRecent: 'Yes' | 'No';
+  currentZone: string;
 }
 
 export interface TaskRow {
@@ -77,6 +78,7 @@ export class DataLoaderService implements OnModuleInit {
       distanceToNearestObjectM: Number(r.distance_to_nearest_object_m),
       safetyAlertTriggered: r.safety_alert_triggered as OperationRow['safetyAlertTriggered'],
       trainingCompletedRecent: r.training_completed_recent as OperationRow['trainingCompletedRecent'],
+      currentZone: r.current_zone,
     }));
   }
 

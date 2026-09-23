@@ -11,12 +11,15 @@ import { OperatorsController } from './operators/operators.controller';
 import { FleetController } from './fleet/fleet.controller';
 import { HealthController } from './health/health.controller';
 import { IncidentsController } from './incidents/incidents.controller';
+import { MachinesController } from './machines/machines.controller';
 import { DataLoaderService } from './data/data-loader.service';
 import { RulesService } from './rules/rules.service';
 import { CrossFeatureService } from './operators/cross-feature.service';
 import { CostEstimationService } from './fleet/cost-estimation.service';
 import { TaskStatusService } from './tasks/task-status.service';
 import { IncidentsService } from './incidents/incidents.service';
+import { MachineScoringService } from './machines/machine-scoring.service';
+import { ZoneStatusService } from './machines/zone-status.service';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { MlServiceHealthService } from './health/ml-service-health.service';
 
@@ -33,6 +36,7 @@ import { MlServiceHealthService } from './health/ml-service-health.service';
     FleetController,
     HealthController,
     IncidentsController,
+    MachinesController,
   ],
   providers: [
     AppService,
@@ -43,6 +47,8 @@ import { MlServiceHealthService } from './health/ml-service-health.service';
     TaskStatusService,
     IncidentsService,
     MlServiceHealthService,
+    MachineScoringService,
+    ZoneStatusService,
   ],
 })
 export class AppModule implements NestModule {
