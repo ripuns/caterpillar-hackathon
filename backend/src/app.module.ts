@@ -7,6 +7,7 @@ import { SafetyController } from './safety/safety.controller';
 import { BehaviorController } from './behavior/behavior.controller';
 import { TrainingController } from './training/training.controller';
 import { PredictionController } from './prediction/prediction.controller';
+import { SafetyRiskController } from './prediction/safety-risk.controller';
 import { OperatorsController } from './operators/operators.controller';
 import { FleetController } from './fleet/fleet.controller';
 import { HealthController } from './health/health.controller';
@@ -32,6 +33,7 @@ import { MlServiceHealthService } from './health/ml-service-health.service';
     BehaviorController,
     TrainingController,
     PredictionController,
+    SafetyRiskController,
     OperatorsController,
     FleetController,
     HealthController,
