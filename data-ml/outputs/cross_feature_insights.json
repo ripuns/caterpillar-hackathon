@@ -1,0 +1,238 @@
+[
+  {
+    "operatorId": "OP-01",
+    "operatorNeedsAttention": false,
+    "signalsFired": [
+      "safety"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 2,
+      "idlingSessionCount": 0,
+      "overrunTaskCount": 0
+    },
+    "recommendation": null,
+    "recommendedModuleId": null,
+    "recommendedModuleTitle": null
+  },
+  {
+    "operatorId": "OP-02",
+    "operatorNeedsAttention": false,
+    "signalsFired": [],
+    "evidence": {
+      "safetyIncidentCount": 1,
+      "idlingSessionCount": 0,
+      "overrunTaskCount": 0
+    },
+    "recommendation": null,
+    "recommendedModuleId": null,
+    "recommendedModuleTitle": null
+  },
+  {
+    "operatorId": "OP-03",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "safety",
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 2,
+      "idlingSessionCount": 0,
+      "overrunTaskCount": 2
+    },
+    "recommendation": "Consider refresher training: Maintaining Safety Standards Under Time Pressure.",
+    "recommendedModuleId": "TH_SAFETY_UNDER_PRESSURE",
+    "recommendedModuleTitle": "Maintaining Safety Standards Under Time Pressure"
+  },
+  {
+    "operatorId": "OP-04",
+    "operatorNeedsAttention": false,
+    "signalsFired": [],
+    "evidence": {
+      "safetyIncidentCount": 1,
+      "idlingSessionCount": 0,
+      "overrunTaskCount": 1
+    },
+    "recommendation": null,
+    "recommendedModuleId": null,
+    "recommendedModuleTitle": null
+  },
+  {
+    "operatorId": "OP-05",
+    "operatorNeedsAttention": false,
+    "signalsFired": [
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 0,
+      "idlingSessionCount": 0,
+      "overrunTaskCount": 8
+    },
+    "recommendation": null,
+    "recommendedModuleId": null,
+    "recommendedModuleTitle": null
+  },
+  {
+    "operatorId": "OP-06",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "behavior",
+      "safety"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 2,
+      "idlingSessionCount": 25,
+      "overrunTaskCount": 0
+    },
+    "recommendation": "Consider refresher training: Safe and Efficient Machine Operation.",
+    "recommendedModuleId": "TH_SAFE_EFFICIENT_OPS",
+    "recommendedModuleTitle": "Safe and Efficient Machine Operation"
+  },
+  {
+    "operatorId": "OP-07",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "behavior",
+      "safety",
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 2,
+      "idlingSessionCount": 21,
+      "overrunTaskCount": 11
+    },
+    "recommendation": "Consider refresher training: General Refresher: Safety, Efficiency and Machine Use.",
+    "recommendedModuleId": "TH_GENERAL_REFRESHER",
+    "recommendedModuleTitle": "General Refresher: Safety, Efficiency and Machine Use"
+  },
+  {
+    "operatorId": "OP-08",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "behavior",
+      "safety",
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 7,
+      "idlingSessionCount": 25,
+      "overrunTaskCount": 7
+    },
+    "recommendation": "Consider refresher training: General Refresher: Safety, Efficiency and Machine Use.",
+    "recommendedModuleId": "TH_GENERAL_REFRESHER",
+    "recommendedModuleTitle": "General Refresher: Safety, Efficiency and Machine Use"
+  },
+  {
+    "operatorId": "OP-09",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "behavior",
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 1,
+      "idlingSessionCount": 2,
+      "overrunTaskCount": 12
+    },
+    "recommendation": "Consider refresher training: Task Time Management and Idle Reduction.",
+    "recommendedModuleId": "TH_TIME_MANAGEMENT",
+    "recommendedModuleTitle": "Task Time Management and Idle Reduction"
+  },
+  {
+    "operatorId": "OP-10",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "behavior",
+      "safety",
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 3,
+      "idlingSessionCount": 3,
+      "overrunTaskCount": 15
+    },
+    "recommendation": "Consider refresher training: General Refresher: Safety, Efficiency and Machine Use.",
+    "recommendedModuleId": "TH_GENERAL_REFRESHER",
+    "recommendedModuleTitle": "General Refresher: Safety, Efficiency and Machine Use"
+  },
+  {
+    "operatorId": "OP-11",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "behavior",
+      "safety",
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 4,
+      "idlingSessionCount": 3,
+      "overrunTaskCount": 19
+    },
+    "recommendation": "Consider refresher training: General Refresher: Safety, Efficiency and Machine Use.",
+    "recommendedModuleId": "TH_GENERAL_REFRESHER",
+    "recommendedModuleTitle": "General Refresher: Safety, Efficiency and Machine Use"
+  },
+  {
+    "operatorId": "OP-12",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "behavior",
+      "safety",
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 16,
+      "idlingSessionCount": 3,
+      "overrunTaskCount": 2
+    },
+    "recommendation": "Consider refresher training: General Refresher: Safety, Efficiency and Machine Use.",
+    "recommendedModuleId": "TH_GENERAL_REFRESHER",
+    "recommendedModuleTitle": "General Refresher: Safety, Efficiency and Machine Use"
+  },
+  {
+    "operatorId": "OP-13",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "safety",
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 8,
+      "idlingSessionCount": 1,
+      "overrunTaskCount": 4
+    },
+    "recommendation": "Consider refresher training: Maintaining Safety Standards Under Time Pressure.",
+    "recommendedModuleId": "TH_SAFETY_UNDER_PRESSURE",
+    "recommendedModuleTitle": "Maintaining Safety Standards Under Time Pressure"
+  },
+  {
+    "operatorId": "OP-14",
+    "operatorNeedsAttention": false,
+    "signalsFired": [
+      "safety"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 2,
+      "idlingSessionCount": 1,
+      "overrunTaskCount": 1
+    },
+    "recommendation": null,
+    "recommendedModuleId": null,
+    "recommendedModuleTitle": null
+  },
+  {
+    "operatorId": "OP-15",
+    "operatorNeedsAttention": true,
+    "signalsFired": [
+      "behavior",
+      "task"
+    ],
+    "evidence": {
+      "safetyIncidentCount": 1,
+      "idlingSessionCount": 2,
+      "overrunTaskCount": 8
+    },
+    "recommendation": "Consider refresher training: Task Time Management and Idle Reduction.",
+    "recommendedModuleId": "TH_TIME_MANAGEMENT",
+    "recommendedModuleTitle": "Task Time Management and Idle Reduction"
+  }
+]

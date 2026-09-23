@@ -1,0 +1,29 @@
+{
+  "train": {
+    "mae": 4.588,
+    "rmse": 6.236,
+    "r2": 0.933
+  },
+  "validation": {
+    "mae": 7.581,
+    "rmse": 10.873,
+    "r2": 0.8982
+  },
+  "test": {
+    "mae": 4.127,
+    "rmse": 6.761,
+    "r2": 0.9255
+  },
+  "n_train": 173,
+  "n_val": 37,
+  "n_test": 38,
+  "features": [
+    "task_type",
+    "weather",
+    "operator_skill",
+    "machine_age_yrs",
+    "estimated_time_min"
+  ],
+  "target": "actual_time_min",
+  "seed": 42
+}
