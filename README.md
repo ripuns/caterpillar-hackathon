@@ -16,53 +16,51 @@
 4. **Unusual behavior detection** — e.g. excessive idling, unsafe operation patterns
 5. **Task time estimation** — predict time to complete a task based on past data and environmental conditions
 
-*(⚠️ Note: the problem statement document was only partially photographed/reviewed at time of writing — re-check for any additional outcomes, constraints, or judging criteria once the full doc is available. Sections below reflect a working assumption made on incomplete information — see the caveat immediately below.)*
+**Full problem statement now reviewed** . A second sample dataset was provided — see §3.1 — which resolves the ML ambiguity below.
 
-**⚠️ Open question — do not treat "no ML/LLM" as settled.** The problem statement's own framing language — "an *intelligent* assistant," "*end-to-end application*," "think beyond just a tool — make it an *intelligent companion*" — is a real signal that the panel may expect some ML/LLM element, even though the 5 listed "expected outcomes" are individually achievable with rule-based logic alone. The outcomes list may be a **floor** (minimum deliverables), not a **ceiling** (the full scope). This is a genuine ambiguity, not yet resolved. Do not finalize the "rule-based only" decision below until the full problem statement (and ideally the judging rubric, if one exists) has been read in full.
+**Resolved: ML is warranted for task-time estimation specifically.** The `Task Time Estimation` sample data (Task Type, Weather, Operator Skill, Machine Age → Estimated vs Actual Time) shows real, learnable structure: Beginner+Cloudy overruns estimate by 40%, Expert+Sunny finishes under estimate, Windy+Demolition overruns — the delta correlates with skill/weather/machine-age in a way a plain average can't capture. Combined with the "intelligent companion" framing, this is Caterpillar signaling that task-time estimation specifically should be a genuine regression model, not a lookup average. **Safety features and unusual-behavior detection remain rule-based** (deterministic, explainable — still the right call for safety-critical logic, and defensible to the panel as a deliberate choice, not a shortcut).
 
-**Event format:** 24-hour build. Two panel review checkpoints during the event (panel asks how/when/why questions on progress — treat these as mini pitch rehearsals, not just status checks).
+**Event format:** 24-hour build. Two panel review checkpoints during the event (panel asks how/when/why questions on progress — treat these as mini pitch rehearsals, not just status checks). **First review in ~5 hours from kickoff.**
 
-**Team:** 3 people. Role/skill mapping not finalized — **to be assigned once teammates arrive** (see §6).
+**Team & Roles (confirmed):**
+- **Anamika** — Frontend/Dashboard
+- **Ripun** — Backend/Rules
+- **Dev** — Data + Training Hub + Integration
+
+See [`EXECUTION_PLAN.md`](./EXECUTION_PLAN.md) for the detailed phase-by-phase, per-person plan to the first review.
 
 ---
 
-## 2. Key Design Decisions (Working, Not Fully Locked — See §1 Caveat)
+## 2. Key Design Decisions (Locked — See §2.1 for ML Scope)
 
-**Core logic (safety, idling, task dashboard) → rule-based, deterministic. This part is solid regardless of the ML question.**
-- Nothing in the problem statement's *outcomes list* or sample dataset mandates machine learning for these specific features — they're naturally rule-shaped (thresholds, boolean checks, lookups), and building them as rules first is correct even in the "yes, add ML/LLM" scenario, because:
-  1. Rule-based safety logic is explainable/auditable, which is a genuinely strong feature to keep even if an ML layer is added elsewhere — safety-critical logic staying deterministic is a defensible design choice to state to the panel, not just a shortcut.
-  2. It's the fastest path to a working demo, so build it first regardless, then layer intelligence on top if the fuller problem statement calls for it.
+**Safety, idling detection, task dashboard → rule-based, deterministic.**
+- These are naturally rule-shaped (thresholds, boolean checks, lookups), explainable/auditable, and the fastest path to a working demo.
 - **Safety features → rule-based, deterministic logic.** E.g.:
   - `if seatbelt_status == "Unfastened": trigger_alert("seatbelt")`
   - `if idling_time_min > THRESHOLD: flag("excessive_idling")`
   - `if distance_to_nearest_object < SAFE_DISTANCE: trigger_alert("proximity_hazard")`
   - Rule-based logic is a *feature*, not a shortcut: it's fully explainable and auditable, which is a strong story for the panel ("every alert traces to a specific, inspectable rule — no black box").
-- **Task time estimation → simple average / weighted average, or basic linear regression** over historical task data (task type, environmental conditions). Not a trained ML classifier. This is the one place a very light "smart" layer is justified, to satisfy the "intelligent companion" framing, while safety logic stays fully deterministic.
+- **Task time estimation → real trained regression model.** See §2.1 — resolved, not a weighted average. A weighted-average calculation exists only as Ripun's fallback if the trained model isn't ready in time (see `EXECUTION_PLAN.md`), never as the primary design.
 - **Unusual behavior detection → rule/threshold-based**, same pattern as safety alerts (e.g., idling time above a configured threshold, operation patterns outside a defined normal range). Not anomaly-detection ML.
 
 **Software type: standalone, with mission-oriented design principles layered on top.**
 - Runs self-contained on one machine — no live network/cloud dependency required for core function.
 - But deliberately designed as if it *could* extend to fleet-wide monitoring later: realistic telemetry-like data schema, modular architecture (rules engine separable from UI, data layer separable from logic), explainable/deterministic safety logic. This is a framing choice worth stating explicitly to the panel — it signals engineering maturity beyond "just a hackathon demo."
 
-## 2.1 If "Intelligent Companion" Means Real ML/LLM Is Expected
+## 2.1 ML Scope (Resolved)
 
-Plausible readings of "intelligent... end-to-end companion," roughly ordered by likelihood/effort:
+**Task time estimation → real regression model.** Train on `Task Type, Weather, Operator Skill, Machine Age → Actual Time` (§3.1). A small Python/scikit-learn model (even plain linear regression or a small decision tree) trained on the synthetic dataset, wrapped in one endpoint (`POST /predict-task-time`), called from NestJS. This is the genuine "intelligent" element and the strongest panel talking point — it's real learned prediction, not a hardcoded average.
 
-1. **A conversational assistant UI** — operator can ask the system questions in natural language ("what's my next task?", "why was I flagged?") and get an answer. This is the most literal reading of "companion" and the most demo-impressive. Implementable as a thin LLM layer (OpenAI/Gemini API call) that answers *only* from the app's own structured data (tasks, alerts, logs) — a grounded-response pattern (inject the structured facts into the prompt, constrain the answer to those facts) rather than a free-form response. This is a **NestJS-side addition** (direct HTTP call to the LLM API), not a separate Python service — no ML training involved.
-2. **A trained ML model somewhere in the pipeline** — e.g., task-time estimation upgraded from weighted-average to a real regression/gradient-boosted model trained on the synthetic dataset, or unusual-behavior detection upgraded from thresholds to a learned anomaly score. If required, this is a small, isolated addition: one Python service (scikit-learn), one endpoint, called from NestJS — see §5.4 for the contract-first pattern to reuse.
-3. **Both** — conversational layer *and* a trained model feeding it. Highest effort; only attempt if the full problem statement explicitly asks for both and there's clearly enough team bandwidth.
+**Everything else stays rule-based** (safety alerts, unusual-behavior detection) — deliberate choice, not a shortcut: deterministic logic is auditable and appropriate for safety-critical features, and it's also simply not what the new dataset is shaped for.
 
-**Recommended posture until the full statement is read:** build the rule-based core first (§2) so there's always a working demo, and treat the LLM conversational layer (option 1) as the **first upgrade to add** if "intelligent companion" turns out to require more than rules — it's low-effort (an API call + prompt template, hours not days), high-narrative-value ("ask your assistant" is a compelling live demo moment), and doesn't require training anything. Only reach for a trained model (option 2) if the statement or panel explicitly asks for learned/predictive behavior beyond what a weighted average or clear rule can defensibly provide.
-
-**Action item:** as soon as the rest of the problem statement is available, re-read it specifically hunting for the words "predict," "learn," "model," "natural language," "chat," "ask," or "conversational" — those are the tells that ML/LLM is an explicit requirement rather than optional flavor text.
+**Optional stretch (only if core is done early):** a thin conversational layer — operator asks "what's my next task?" — as a direct LLM API call from NestJS, grounded in the app's own data. Not required; do not start this before the must-haves are solid.
 
 ---
 
-**Tech stack: NestJS backend + React/Next.js frontend.**
-- No Python/ML microservice needed unless §2.1's ML contingency is triggered. Default to one backend service.
-- This plays directly to the team's demonstrated NestJS speed rather than defaulting to Streamlit/Flask, which would sideline that strength and put the whole team in less-familiar territory.
-- Rule-based safety logic, task dashboard, training hub content, and the simple task-time estimate can all live comfortably in NestJS services — no need for Python at all unless the team specifically wants a regression library's convenience for task-time estimation, in which case treat it as a small optional Python microservice behind one endpoint (§5.4), not a requirement.
-- Local persistence: SQLite or even just structured JSON/CSV files read by NestJS, given the standalone/local nature of the app — no need for a full external database setup under a 24-hour clock.
+**Tech stack: NestJS backend + React/Next.js frontend + one small Python microservice for the task-time model.**
+- NestJS: dashboard API, rule engine, persistence, orchestration — plays to the team's speed.
+- Python/FastAPI: single `/predict-task-time` endpoint wrapping a scikit-learn model trained on §3.1's dataset. Kept deliberately narrow — see §5.4 for the integration contract.
+- Local persistence: SQLite or structured JSON/CSV files read by NestJS — no external DB needed under this timeline.
 
 ---
 
@@ -82,6 +80,20 @@ Plausible readings of "intelligent... end-to-end companion," roughly ordered by 
 
 **Action item:** finalize the extended schema as a team in the first working session, write it down (same contract-first discipline as §5.4), and generate a synthetic CSV/SQLite dataset early so dashboard, safety-rules, and task-time-estimation work can all proceed in parallel against the same fixture data.
 
+### 3.1 Task Time Estimation Dataset (Provided Sample)
+
+`Task ID, Task Type, Weather, Operator Skill, Machine Age (yrs), Estimated Time (min), Actual Time (min)`
+
+| Task ID | Task Type | Weather | Operator Skill | Machine Age | Estimated | Actual |
+|---|---|---|---|---|---|---|
+| T001 | Earth Excavation | Sunny | Expert | 2 | 60 | 58 |
+| T002 | Trenching | Rainy | Intermediate | 4 | 45 | 52 |
+| T003 | Material Loading | Cloudy | Beginner | 3 | 30 | 42 |
+| T004 | Grading | Sunny | Expert | 5 | 35 | 33 |
+| T005 | Demolition | Windy | Intermediate | 6 | 90 | 105 |
+
+**Signal observed:** actual time deviates from estimate in a way that correlates with skill, weather, and machine age (Beginner+Cloudy → +40% over; Expert+Sunny → under; poor weather + higher machine age → overrun). This is real regression signal, not noise — confirms §2.1's decision to build a trained model here rather than a static average. Dev should treat the *target* as `Actual Time` (what really happens) with `Estimated Time` as just one input feature, not the ground truth to reproduce.
+
 ---
 
 ## 4. Feature-to-Rule Mapping (Working Draft)
@@ -94,16 +106,16 @@ Plausible readings of "intelligent... end-to-end companion," roughly ordered by 
 | Safety: incident logging | Simple log/append-only record, timestamped, linked to operator + machine | Basic data feature, not detection |
 | Operator training hub | Pick **one** format per problem statement — recommend e-learning videos (static content, fastest to build) unless a teammate has a strong reason to build instructor booking (scheduling UI) or simulation modules (higher effort, likely not worth it in 24h) | Scope-cut candidate if time is tight |
 | Unusual behavior detection | Rule/threshold: excessive idling (`idling_time > X`), unsafe patterns (e.g. repeated safety alerts in a session) | Same rule-engine as safety features — can share code |
-| Task time estimation | Weighted average of historical task durations by `task_type` + `environmental_conditions`, or basic linear regression if time allows | Start with the average; upgrade to regression only if core features are done early |
+| Task time estimation | Trained regression model (scikit-learn) on §3.1 dataset: `Task Type, Weather, Operator Skill, Machine Age → Actual Time` | Real ML, per §2.1 — served via Python `/predict-task-time` endpoint |
 
 This table is a starting draft — revise once the full problem statement and any judging rubric are available, and once the team has picked its scope cuts (see §4.1).
 
 ### 4.1 Scope Cuts for 24 Hours (Draft — Revisit at Hour 0)
 
 Given 24 hours and 3 people:
-- **Must-have (core demo):** daily task dashboard, seatbelt + proximity safety rules with visible alerts, excessive-idling detection, one training-hub format (recommend e-learning/static content), basic task-time estimate (weighted average, not regression).
-- **Nice-to-have if ahead of schedule:** incident logging as a full searchable log rather than a flat list, regression-based task-time estimate, a second training-hub format, a "mission-oriented" extensibility angle made visible in the UI (e.g., a toggle showing "this scales to fleet view").
-- **Cut first if behind schedule:** instructor booking / simulation modules (high effort, low payoff vs. e-learning), regression modeling, elaborate incident-log search/filter UI.
+- **Must-have (core demo):** daily task dashboard, seatbelt + proximity safety rules with visible alerts, excessive-idling detection, one training-hub format (recommend e-learning/static content), task-time estimate live (real trained model if ready by the integration pass, Ripun's weighted-average fallback otherwise — either is an acceptable must-have result, per `EXECUTION_PLAN.md`).
+- **Nice-to-have if ahead of schedule:** incident logging as a full searchable log rather than a flat list, tuning/improving the regression model's accuracy, a second training-hub format, a "mission-oriented" extensibility angle made visible in the UI (e.g., a toggle showing "this scales to fleet view").
+- **Cut first if behind schedule:** instructor booking / simulation modules (high effort, low payoff vs. e-learning), elaborate incident-log search/filter UI.
 
 Re-confirm this list as a team once roles are assigned and the full problem statement is reviewed.
 
@@ -111,14 +123,13 @@ Re-confirm this list as a team once roles are assigned and the full problem stat
 
 ## 5. Team Workflow
 
-### 5.1 Roles — TO BE ASSIGNED
+### 5.1 Roles (Confirmed)
 
-Skill mapping not done yet. **Placeholder buckets:**
-- **Backend/Data** — NestJS services, rule engine, dataset generation/schema
-- **Frontend/Dashboard** — React/Next.js UI for the 5 outcomes
-- **Integration + Demo Prep** — wiring frontend↔backend, panel-review narrative, demo script, scope-cut calls under time pressure
+- **Anamika — Frontend/Dashboard**: React/Next.js UI for all 5 outcomes
+- **Ripun — Backend/Rules**: NestJS services, rule engine, API, persistence, integration of the Python model endpoint
+- **Dev — Data + Training Hub + Integration**: synthetic dataset generation, the task-time regression model (Python/scikit-learn), training-hub content, and pairing on final integration + demo/panel narrative
 
-*Update this section once the team is present and roles are confirmed — do not guess names in advance.*
+Full phase-by-phase breakdown: see [`EXECUTION_PLAN.md`](./EXECUTION_PLAN.md).
 
 ### 5.2 Panel Review Prep (Two Checkpoints During the Event)
 
@@ -136,7 +147,7 @@ Keep a visible, updated task/progress board (physical or digital) so panel quest
 
 **Branch structure:**
 - `main` — always demo-able. Nothing merges here unless it's tested and working.
-- One branch per teammate/area (e.g. `backend`, `frontend`, matching §5.1 roles once assigned). Short-lived sub-branches are fine if someone splits their own work further, but don't let any branch live more than a few hours without merging back.
+- `frontend` (Anamika), `backend` (Ripun), `data` (Dev) — one branch per person, matching §5.1 roles. Short-lived sub-branches are fine if someone splits their own work further, but don't let any branch live more than a few hours without merging back.
 
 **Contract-first, not integration-last:**
 - Before writing feature code, commit a `CONTRACTS.md` (or shared TypeScript interfaces / JSON schema file) to `main` defining the NestJS↔frontend API shapes (and the dataset schema from §3). This is what lets three people work in parallel without colliding later — branches diverge safely when the interface between them is fixed, and collide badly when someone silently reshapes a response mid-hackathon.
@@ -150,14 +161,41 @@ Keep a visible, updated task/progress board (physical or digital) so panel quest
 **Hygiene:**
 - Small, frequent commits with clear messages — debugging a broken demo late at night is much harder against a single giant commit.
 
-### 5.4 If a Python ML Microservice Becomes Necessary (§2.1 Contingency)
+**Daily workflow (each person, on their own branch):**
+```
+git checkout <your-branch>
+git pull origin <your-branch>          # get your own latest
+# ...do work...
+git add .
+git commit -m "clear message"
+git push origin <your-branch>
+```
 
-Only if the fuller problem statement or panel feedback makes a trained model necessary:
-- Keep it to **one Python/FastAPI service** with a single, narrow endpoint (e.g. `POST /predict`), not a sprawling parallel backend.
-- Lock the request/response JSON schema in `CONTRACTS.md` before either side writes code against it.
-- Fixed local ports for each service, and a single command to boot both together (a root script with `concurrently`, or `docker-compose up`).
+**Merging to `main` (every ~1hr, per person):**
+```
+git checkout main
+git pull origin main
+git merge <your-branch>
+# fix conflicts if any, then:
+git push origin main
+```
+
+**Then sync your branch with the updated `main`:**
+```
+git checkout <your-branch>
+git merge main
+git push origin <your-branch>
+```
+
+### 5.4 Python ML Microservice (§2.1 — Locked, Not Contingent)
+
+Per §2.1, the task-time model is a locked part of the build, not a maybe:
+- Keep it to **one Python/FastAPI service** with a single, narrow endpoint (`POST /predict-task-time`, see `CONTRACTS.md`), not a sprawling parallel backend.
+- Ripun owns the FastAPI wrapper and the NestJS↔Python integration (see `EXECUTION_PLAN.md` for the reasoning — this was reassigned from Dev to avoid overloading him); Dev owns training and validating the model itself, handing off the model file to Ripun mid-build.
+- Request/response JSON schema is locked in `CONTRACTS.md` before either side writes code against it.
+- Fixed local ports for each service (`CONTRACTS.md`), and a single command to boot both together (a root script with `concurrently`, or `docker-compose up`).
 - The frontend talks only to NestJS; NestJS talks to Python server-to-server — so CORS never needs to be configured on the Python side.
-- NestJS treats the Python call as fallible: timeout + graceful degradation (e.g., "estimate unavailable" for that item) rather than letting a Python-side failure take down the whole request.
+- NestJS treats the Python call as fallible: timeout + graceful degradation to a weighted-average fallback (see `CONTRACTS.md`'s `source` field) rather than letting a Python-side failure take down the whole request.
 
 ---
 
@@ -165,7 +203,7 @@ Only if the fuller problem statement or panel feedback makes a trained model nec
 
 ### 6.1 Core Runtimes
 - **Node.js** (v20 LTS or later) — for frontend (React/Next.js) and NestJS backend. Download: nodejs.org
-- **Python** (3.10–3.12) — only needed if the §2.1/§5.4 ML contingency is triggered. Download: python.org
+- **Python** (3.10–3.12) — for the task-time model service (§2.1/§5.4). Download: python.org
 - **Git** — confirm with `git --version`.
 - **npm/yarn/pnpm** — pick one and stick to it across the team to avoid lockfile conflicts.
 
@@ -175,11 +213,12 @@ Only if the fuller problem statement or panel feedback makes a trained model nec
 - Optional UI component library for speed: `npm install @radix-ui/react-*` or just use Tailwind utility classes directly
 
 ### 6.3 Backend Setup
-- **NestJS**: `npm install -g @nestjs/cli` and scaffold a project in advance. Owns: REST/WebSocket API for the dashboard, rule engine (safety, idling, task-time estimate), and — if triggered — the LLM conversational layer (direct HTTP calls to OpenAI/Gemini) and/or the outbound call to a Python `/predict` endpoint.
+- **NestJS**: `npm install -g @nestjs/cli` and scaffold a project in advance. Owns: REST/WebSocket API for the dashboard, rule engine (safety, idling), the outbound call to the Python `/predict-task-time` endpoint (§5.4), and — only as an optional stretch, see §2.1 — a direct LLM conversational layer.
+- **FastAPI** (Python): single `/predict-task-time` endpoint (§5.4) — `pip install fastapi uvicorn scikit-learn pandas`.
 - Local persistence via SQLite or structured JSON/CSV files — no need for a full external database under a 24-hour clock.
-- Decide local port and folder structure as a team before the event.
+- Decide local port and folder structure as a team before the event — see `CONTRACTS.md` for the agreed ports.
 
-### 6.4 LLM API Access (only if §2.1 contingency applies — set up in advance regardless, since it's cheap insurance)
+### 6.4 LLM API Access (only for the optional conversational stretch in §2.1 — not required for the core build; set up in advance regardless, since it's cheap insurance)
 - **OpenAI API key** (GPT-4o-mini or similar cost-effective model) — sign up at platform.openai.com, generate an API key, add a small amount of credit
 - **Alternative/backup**: Google Gemini API (generous free tier — aistudio.google.com)
 - Test the API key works with a simple curl/request **before** the hackathon
