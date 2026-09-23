@@ -14,16 +14,20 @@ Referenced files: [`README.md`](./README.md) (problem statement, design reasonin
 - **Branches:** `main`, `frontend`, `backend`, `data`. Created once at the start (§1.2).
 - **Ports:** NestJS `3000`, FastAPI `8001`, Next.js `3001`.
 - **Package managers:** `npm` for both Node projects (NestJS backend, Next.js frontend). `pip` + a virtualenv for the Python service.
-- **Folder layout (create exactly this):**
+- **Folder layout (actual, as of the `data` branch merge — supersedes any earlier `/data` references below):**
   ```
   /backend          ← NestJS project
   /frontend         ← Next.js project
-  /ml-service       ← FastAPI project
-  /data             ← generated CSVs + data-generation script
+  /ml-service       ← FastAPI project (not yet created)
+  /data-ml          ← Dev's data generation, validation, training, scoring, and handoff docs
+    /data           ← generated CSVs (operations.csv, tasks.csv) live here, i.e. data-ml/data/
+    /model          ← trained model artifacts (task_time_pipeline.joblib, metrics.json)
+    /outputs        ← generated JSON snapshots (operator_scores.json, alert_reasoning.json, cross_feature_insights.json)
   CONTRACTS.md
   README.md
   EXECUTION_PLAN.md
   ```
+  Originally specced as a repo-root `/data` folder — kept as `data-ml/` instead to avoid disrupting Dev's already-built, tested pipeline (his scripts' internal relative paths assume this structure). Any instruction below referencing `/data` or `data/operations.csv` means `data-ml/data/operations.csv` in the actual repo.
 - **Naming convention:** CSV files use `snake_case` headers. All JSON over HTTP uses `camelCase`. The mapping table for each field is in `CONTRACTS.md`'s "API boundary mapping" notes — use those exact mappings, do not invent new ones.
 - **Every timestamp** is ISO 8601 UTC (`2026-09-24T08:15:00Z` format).
 - **Every ID field** uses the exact prefixes already fixed in `CONTRACTS.md`: `M-01`..`M-10` (machines), `OP-01`..`OP-15` (operators), `T001`, `T002`... (tasks), `A001`... (alerts), `F001`... (behavior flags), `TH001`... (training modules), `I001`... (incidents).
@@ -136,9 +140,9 @@ In each controller, implement the `GET`/`POST` route from `CONTRACTS.md` §1, §
 
 **Deliverable at 1:00:** `npm run start:dev` serves all 5 stub endpoints on port 3000 — push immediately so Anamika is unblocked.
 
-**Step 2 (1:00–2:00): Real rule logic**
-Wait for Dev's `data/operations.csv` and `data/tasks.csv` hand-off (Dev's Step 1, target 1:15). Once available:
-- Create `src/data/data-loader.service.ts` — reads `operations.csv` and `tasks.csv` from the `/data` folder at startup (use the `csv-parse` npm package: `npm install csv-parse`), parses into in-memory arrays of objects, converts `snake_case` CSV headers to `camelCase` per `CONTRACTS.md`'s API boundary mapping tables.
+**Step 2: Real rule logic**
+Dev's `data-ml/data/operations.csv` and `data-ml/data/tasks.csv` are merged and available (see `data-ml/BACKEND_HANDOFF.md` for full integration notes — it documents field mappings, model loading, and gotchas in more detail than restated here).
+- Create `src/data/data-loader.service.ts` — reads `operations.csv` and `tasks.csv` from `../data-ml/data/` at startup (use the `csv-parse` npm package: `npm install csv-parse`), parses into in-memory arrays of objects, converts `snake_case` CSV headers to `camelCase` per `CONTRACTS.md`'s API boundary mapping tables.
 - Create `src/rules/rules.service.ts` implementing exactly these three rules, using the **finalized thresholds** from `CONTRACTS.md`'s "Thresholds (FINALIZED)" section — do not invent different numbers:
   ```ts
   const IDLING_THRESHOLD_MIN = 45;
@@ -196,7 +200,12 @@ When Dev hands off the trained model file (target 2:30, §3 below), replace the 
 
 ---
 
-### 2.3 Dev — Data + Model Training (hand off to Ripun at ~2:30), then Training Hub
+### 2.3 Dev — Data + Model Training — SUPERSEDED, SEE NOTE
+
+**✅ Status: complete, merged into `backend` from `origin/data`.** The steps below describe the *original* plan for this work; Dev's actual implementation went beyond it (15 operators with distinct behavioral archetypes for realistic correlated data rather than independent-random columns, a validation script gating training on schema/consistency checks, plus the Operator Performance Score, alert reasoning, and cross-feature synthesis — none of which were in the original scope). The steps below are kept for historical reference only — **do not re-run or redo this work.** For what actually exists and how to integrate it, read `data-ml/BACKEND_HANDOFF.md` and `data-ml/FRONTEND_HANDOFF.md` instead; those are the current source of truth for this layer.
+
+<details>
+<summary>Original plan (superseded — click to expand)</summary>
 
 **Step 1 (0:30–1:15): Dataset generator**
 ```
@@ -278,12 +287,12 @@ git push origin data
 ```
 (Do not commit the `.joblib` binary to the `data` branch — copy it directly into `ml-service/` on Ripun's `backend` branch, or place it in a shared local folder both can access, since it's a build artifact, not source.)
 
-**Step 3 (2:30–3:00): Training hub content, or help Anamika**
-If Anamika is on schedule: write `data/training-content.json`, an array of 3-4 objects matching `CONTRACTS.md` §5's shape (`moduleId`, `title`, `format: "article"`, `content`). Suggested titles: "Safe Excavation Practices," "Proper Seatbelt & Proximity Protocols," "Reading Your Task-Time Estimate," "Handling Adverse Weather Conditions." Content: 150-300 words of plausible plain-text guidance each. Hand the JSON file to Ripun to load into `training.controller.ts`.
+</details>
 
-If Anamika is behind schedule: pause this and directly assist her (frontend has no strict single-owner requirement at this stage — extra hands on any of §2.1's steps is more valuable than training-hub polish).
+**Actual outcome:** the model exists at `data-ml/model/task_time_pipeline.joblib` (already merged into `backend`), with real evaluation metrics in `data-ml/model/metrics.json` (test R² 0.93, MAE ~4 min — a legitimately validated model, not just fit-and-forget). `data-ml/predict.py` has a reference implementation for loading and calling it; `data-ml/BACKEND_HANDOFF.md` §1 has the exact FastAPI wiring code, including the correct field-name mapping and an explicit warning that `predict.py`'s own fallback is a placeholder, not the real weighted-average formula to use.
 
-**Deliverable by 3:00:** both CSVs available to Ripun, model handed off (or documented reason it isn't, with Ripun's fallback already covering the gap), training-hub content ready if time allowed.
+**Step 3: Training hub content — still outstanding, not yet done**
+Write `data-ml/data/training-content.json` (or wherever the team agrees), an array of 3-4 objects matching `CONTRACTS.md` §5's shape (`moduleId`, `title`, `format: "article"`, `content`). Suggested titles: "Safe Excavation Practices," "Proper Seatbelt & Proximity Protocols," "Reading Your Task-Time Estimate," "Handling Adverse Weather Conditions." Content: 150-300 words of plausible plain-text guidance each. Hand the JSON file to Ripun to load into `training.controller.ts`. This is genuinely not done yet and isn't covered by anything in the data-ml handoff — needs explicit follow-up with Dev or Anamika.
 
 ---
 
