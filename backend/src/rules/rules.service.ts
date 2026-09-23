@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OperationRow } from '../data/data-loader.service';
 
 /**
@@ -32,6 +32,8 @@ export interface BehaviorFlag {
 
 @Injectable()
 export class RulesService {
+  private readonly logger = new Logger(RulesService.name);
+
   checkSeatbelt(row: OperationRow): boolean {
     return row.seatbeltStatus === 'Unfastened';
   }
@@ -50,8 +52,9 @@ export class RulesService {
 
     for (const row of operations) {
       if (this.checkSeatbelt(row)) {
+        const alertId = `A${String(counter++).padStart(3, '0')}`;
         alerts.push({
-          alertId: `A${String(counter++).padStart(3, '0')}`,
+          alertId,
           machineId: row.machineId,
           operatorId: row.operatorId,
           timestamp: row.timestamp,
@@ -59,10 +62,14 @@ export class RulesService {
           message: 'Seatbelt unfastened while machine active',
           severity: 'high',
         });
+        this.logger.log(
+          `RULE FIRED seatbelt alertId=${alertId} machineId=${row.machineId} operatorId=${row.operatorId} seatbeltStatus=${row.seatbeltStatus}`,
+        );
       }
       if (this.checkProximity(row)) {
+        const alertId = `A${String(counter++).padStart(3, '0')}`;
         alerts.push({
-          alertId: `A${String(counter++).padStart(3, '0')}`,
+          alertId,
           machineId: row.machineId,
           operatorId: row.operatorId,
           timestamp: row.timestamp,
@@ -70,6 +77,9 @@ export class RulesService {
           message: `Distance to nearest object ${row.distanceToNearestObjectM}m is below ${PROXIMITY_THRESHOLD_M}m safe threshold`,
           severity: 'medium',
         });
+        this.logger.log(
+          `RULE FIRED proximity alertId=${alertId} machineId=${row.machineId} operatorId=${row.operatorId} distanceM=${row.distanceToNearestObjectM} thresholdM=${PROXIMITY_THRESHOLD_M}`,
+        );
       }
     }
 
@@ -82,8 +92,9 @@ export class RulesService {
 
     for (const row of operations) {
       if (this.checkIdling(row)) {
+        const flagId = `F${String(counter++).padStart(3, '0')}`;
         flags.push({
-          flagId: `F${String(counter++).padStart(3, '0')}`,
+          flagId,
           machineId: row.machineId,
           operatorId: row.operatorId,
           timestamp: row.timestamp,
@@ -92,6 +103,9 @@ export class RulesService {
           threshold: IDLING_THRESHOLD_MIN,
           message: `Idling time ${row.idlingTimeMin} min exceeds ${IDLING_THRESHOLD_MIN} min threshold`,
         });
+        this.logger.log(
+          `RULE FIRED excessive_idling flagId=${flagId} machineId=${row.machineId} operatorId=${row.operatorId} idlingMin=${row.idlingTimeMin} thresholdMin=${IDLING_THRESHOLD_MIN}`,
+        );
       }
     }
 

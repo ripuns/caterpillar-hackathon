@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { CreateIncidentDto } from './create-incident.dto';
 import { IncidentsService } from './incidents.service';
 import type { Incident } from './incidents.service';
 import { DataLoaderService } from '../data/data-loader.service';
 import { RulesService } from '../rules/rules.service';
+import { paginate } from '../common/pagination';
+import { ApiKeyGuard } from '../common/guards/api-key.guard';
 
 @Controller('incidents')
 export class IncidentsController {
@@ -14,12 +16,13 @@ export class IncidentsController {
   ) {}
 
   @Post()
+  @UseGuards(ApiKeyGuard)
   create(@Body() dto: CreateIncidentDto): Incident {
     return this.incidentsService.create(dto);
   }
 
   @Get()
-  findAll(): Incident[] {
+  findAll(@Query('page') page?: string, @Query('pageSize') pageSize?: string) {
     const manualIncidents = this.incidentsService.findAll();
 
     // Backfill system-generated incidents from the rule engine's safety
@@ -35,8 +38,9 @@ export class IncidentsController {
       loggedBy: 'system',
     }));
 
-    return [...manualIncidents, ...systemIncidents].sort((a, b) =>
+    const all = [...manualIncidents, ...systemIncidents].sort((a, b) =>
       b.timestamp.localeCompare(a.timestamp),
     );
+    return paginate(all, page, pageSize);
   }
 }

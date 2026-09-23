@@ -1,6 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { DataLoaderService } from '../data/data-loader.service';
 import { RulesService } from '../rules/rules.service';
+import { paginate } from '../common/pagination';
 
 @Controller('behavior-flags')
 export class BehaviorController {
@@ -10,7 +11,8 @@ export class BehaviorController {
   ) {}
 
   @Get()
-  findAll() {
-    return this.rules.computeBehaviorFlags(this.dataLoader.getOperations());
+  findAll(@Query('page') page?: string, @Query('pageSize') pageSize?: string) {
+    const flags = this.rules.computeBehaviorFlags(this.dataLoader.getOperations());
+    return paginate(flags, page, pageSize);
   }
 }

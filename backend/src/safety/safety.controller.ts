@@ -1,6 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { DataLoaderService } from '../data/data-loader.service';
 import { RulesService } from '../rules/rules.service';
+import { paginate } from '../common/pagination';
 
 @Controller('safety-alerts')
 export class SafetyController {
@@ -10,7 +11,8 @@ export class SafetyController {
   ) {}
 
   @Get()
-  findAll() {
-    return this.rules.computeSafetyAlerts(this.dataLoader.getOperations());
+  findAll(@Query('page') page?: string, @Query('pageSize') pageSize?: string) {
+    const alerts = this.rules.computeSafetyAlerts(this.dataLoader.getOperations());
+    return paginate(alerts, page, pageSize);
   }
 }

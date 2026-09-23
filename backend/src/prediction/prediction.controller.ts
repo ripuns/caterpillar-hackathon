@@ -1,6 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Logger, Post } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, catchError, timeout } from 'rxjs';
+import { MlServiceHealthService } from '../health/ml-service-health.service';
 
 const ML_SERVICE_URL = 'http://localhost:8001/predict-task-time';
 const REQUEST_TIMEOUT_MS = 2000;
@@ -41,10 +42,28 @@ function weightedAverageFallback(req: PredictTaskTimeRequest): PredictTaskTimeRe
 
 @Controller('predict-task-time')
 export class PredictionController {
-  constructor(private readonly httpService: HttpService) {}
+  private readonly logger = new Logger(PredictionController.name);
+
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly mlServiceHealth: MlServiceHealthService,
+  ) {}
 
   @Post()
   async predict(@Body() body: PredictTaskTimeRequest): Promise<PredictTaskTimeResponse> {
+    let result: PredictTaskTimeResponse;
+
+    // Circuit breaker (CONTRACTS.md §8.5): skip the live call entirely if the
+    // last health check found the ml-service down, rather than waiting out
+    // a timeout on every request.
+    if (!this.mlServiceHealth.isReachable()) {
+      result = weightedAverageFallback(body);
+      this.logger.log(
+        `predict-task-time SKIPPED (circuit open) input=${JSON.stringify(body)} output=${JSON.stringify(result)}`,
+      );
+      return result;
+    }
+
     try {
       const response = await firstValueFrom(
         this.httpService.post<PredictTaskTimeResponse>(ML_SERVICE_URL, body).pipe(
@@ -54,9 +73,16 @@ export class PredictionController {
           }),
         ),
       );
-      return response.data;
+      result = response.data;
     } catch {
-      return weightedAverageFallback(body);
+      result = weightedAverageFallback(body);
     }
+
+    // Decision-level audit log (CONTRACTS.md §8.6): every prediction's input,
+    // output, and which path answered — the evidence behind the "explainable,
+    // not black-box" narrative (README §2).
+    this.logger.log(`predict-task-time input=${JSON.stringify(body)} output=${JSON.stringify(result)}`);
+
+    return result;
   }
 }
