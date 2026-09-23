@@ -1,0 +1,26 @@
+[
+  {
+    "moduleId": "TH_SAFE_EFFICIENT_OPS",
+    "title": "Safe and Efficient Machine Operation",
+    "format": "article",
+    "content": "You're seeing this module because your recent sessions show a combination of safety signals (seatbelt or proximity incidents) alongside excessive idling. These aren't unrelated - idling with the machine unattended or unfocused is often when seatbelt and proximity lapses happen too. Start every session with a seatbelt check before engaging any control, and treat the proximity radar as an active tool, not a passive alert - glance at it before every directional move, not just when it beeps. If you're idling for more than a couple of minutes between tasks, shut the engine down rather than leaving it running unattended; this cuts both your idling time and the window where a proximity or seatbelt lapse can happen unnoticed. Supervisors reviewing your sessions will see both categories improve together once idling discipline tightens, since they share the same root cause: attention during downtime."
+  },
+  {
+    "moduleId": "TH_SAFETY_UNDER_PRESSURE",
+    "title": "Maintaining Safety Standards Under Time Pressure",
+    "format": "article",
+    "content": "You're seeing this module because your task-time overruns and safety incidents (seatbelt or proximity) are showing up together. This is a well-known pattern: when a task is running long, the instinct is to move faster and cut corners on checks that feel like they're costing time. They aren't - a seatbelt check takes seconds, and a proximity violation costs far more in downtime and risk than the few seconds saved skipping it. If you notice you're behind pace on a task, the right response is to flag it to your supervisor and adjust the estimate, not to speed through safety checks to compensate. Overruns get investigated and understood; incidents don't get a second chance. Treat your safety checklist as fixed overhead on every task, regardless of how far behind schedule you are."
+  },
+  {
+    "moduleId": "TH_TIME_MANAGEMENT",
+    "title": "Task Time Management and Idle Reduction",
+    "format": "article",
+    "content": "You're seeing this module because your sessions show a pattern of excessive idling combined with task-time overruns. These two are directly connected: every minute the machine idles between actions is a minute not spent making progress on the task, which is exactly what shows up later as an overrun against the estimate. Before starting a task, take a moment to sequence your actions so the machine is doing productive work continuously rather than idling between steps waiting on materials, positioning, or communication. If idling is unavoidable (waiting on a delivery, coordinating with another operator), shut the engine off rather than letting it run - this alone won't fix an overrun, but it stops the idling number from compounding the picture. Reducing idle time is usually the fastest lever you have to bring overrun tasks back toward their estimate."
+  },
+  {
+    "moduleId": "TH_GENERAL_REFRESHER",
+    "title": "General Refresher: Safety, Efficiency and Machine Use",
+    "format": "article",
+    "content": "You're seeing this module because your recent sessions show signals across all three tracked areas: safety (seatbelt or proximity), behavior (excessive idling), and task performance (time overruns). Rather than treating these as three separate problems, it's worth stepping back and resetting the fundamentals together. Before every session: seatbelt on before any control input, proximity radar treated as an active check on every move, and engine off rather than idling during any unproductive gap. Before every task: a quick mental sequence of the steps needed so the machine stays productive rather than idling between actions, and an honest check-in with yourself or your supervisor if you're falling behind pace rather than speeding through safety checks to compensate. These three areas reinforce each other - tightening up on one tends to improve the others, since they all trace back to the same root habit of staying deliberately engaged with the machine and the task, session to session."
+  }
+]
