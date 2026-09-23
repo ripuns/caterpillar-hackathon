@@ -264,6 +264,46 @@ Computed by aggregating `operations.csv` per `machine_id` instead of per `operat
 
 Response: array of the same shape as §11, one entry per machine (10 total), for a fleet-overview dashboard view. Supports pagination — see §8.2.
 
+## 13. `GET /machines/:machineId/zone-status` — Zone + Compound SOS Status (Supports README §7.5)
+
+**Draft — not yet implemented, confirm shape with the team before building.**
+
+Response:
+```json
+{
+  "machineId": "M-06",
+  "currentZone": "Restricted Zone",
+  "zoneDangerTier": "high",
+  "machineHealthScore": 32,
+  "sosActive": true,
+  "sosReason": "Machine health score 32 (below CRITICAL threshold) while in a high-danger zone"
+}
+```
+`sosActive` is the compound trigger from README §7.5: `true` only when `machineHealthScore` is below the CRITICAL threshold (see §11's status bands — below 40) **and** `zoneDangerTier == "high"`. Requires §11's Machine Health Score to already be computed — this endpoint calls that logic internally rather than duplicating it. Requires `current_zone` added to `operations.csv` (not yet present — new data requirement, see README §7.5).
+
+## 14. `GET /fleet/cost-summary` — Site-Wide Cost/ROI Rollup (Supports README §7.6)
+
+**Draft — not yet implemented, confirm shape with the team before building.**
+
+Response:
+```json
+{
+  "totalIdleCostEstimate": 842.50,
+  "totalOverrunCostEstimate": 1230.00,
+  "totalIncidentCount": 12,
+  "topRiskOperators": [
+    { "operatorId": "OP-06", "estimatedCostImpact": 310.00 }
+  ],
+  "topRiskMachines": [
+    { "machineId": "M-06", "estimatedCostImpact": 415.00 }
+  ],
+  "machinesNearingServiceInterval": [
+    { "machineId": "M-06", "estimatedDowntimeCostAvoided": 2000.00 }
+  ]
+}
+```
+Cost figures are illustrative — exact per-unit dollar assumptions (fuel cost per idle-minute, delay cost per overrun-minute, downtime cost per unplanned-maintenance event) need to be fixed as constants (same discipline as the rule thresholds — define once, document here, never diverge) before this is built. Pure aggregation/arithmetic over §9 (operator summaries) and §11/§12 (machine health) — no new data or ML required.
+
 ---
 
 ## 8. Production Hardening (Hour 5+, Post-Core — See `EXECUTION_PLAN.md`)
@@ -380,3 +420,4 @@ Record any change made after the Hour 0:30 lock, so nobody works against a stale
 | — | added `machine_id` to `tasks.csv` (was missing — no operator-machine affinity exists in `operations.csv` to preserve, so assigned via seeded deterministic randomization) to satisfy §1's `/tasks` response shape. Applied identically on both `backend` and `data` branches. | Ripun |
 | — | rewrote §9 `/operators/:operatorId/summary` response shape to match Dev's actual `cross_feature.py` output (`operatorNeedsAttention`/`signalsFired`/`evidence`/`recommendation`) — the original placeholder shape was written before that logic existed and is no longer accurate. Implemented and verified to match Dev's reference output exactly. | Ripun |
 | — | `GET /training-hub` implemented — serves `data-ml/data/training-content.json`, 4 modules with IDs matching §9's cross-feature module recommendations exactly. | Ripun |
+| — | added draft (not yet implemented) endpoints `GET /machines/:machineId/zone-status` (§13, supports README §7.5 zone tracker + compound SOS) and `GET /fleet/cost-summary` (§14, supports README §7.6 cost/ROI + fleet rollup). Reconciles README §7's differentiator list with CONTRACTS.md, which was missing these two features entirely despite being discussed and agreed on. | Ripun |
