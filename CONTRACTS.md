@@ -133,12 +133,14 @@ Response:
 
 ## 5. `GET /training-hub`
 
+**Implemented.** Serves `data-ml/data/training-content.json`, 4 fixed modules whose `moduleId`s match exactly what §9's cross-feature synthesis references (`TH_SAFE_EFFICIENT_OPS`, `TH_SAFETY_UNDER_PRESSURE`, `TH_TIME_MANAGEMENT`, `TH_GENERAL_REFRESHER`) — these IDs are not arbitrary, they correspond to which combination of safety/behavior/task signals triggered the recommendation.
+
 Response:
 ```json
 [
   {
-    "moduleId": "TH001",
-    "title": "Safe Excavation Practices",
+    "moduleId": "TH_SAFE_EFFICIENT_OPS",
+    "title": "Safe and Efficient Machine Operation",
     "format": "article",
     "content": "..."
   }
@@ -196,18 +198,30 @@ Response: array of the incident objects from §7 (both `loggedBy` values), newes
 
 ## 9. `GET /operators/:operatorId/summary` — Per-Operator Rollup (Supports §7.3)
 
+**Implemented, matching Dev's `data-ml/cross_feature.py` reference logic exactly** (see `data-ml/BACKEND_HANDOFF.md` §4 and `backend/src/operators/cross-feature.service.ts`). This shape supersedes an earlier placeholder written before that logic existed.
+
 Response:
 ```json
 {
-  "operatorId": "OP-04",
-  "totalTasks": 12,
-  "safetyAlertCount": 3,
-  "avgTaskOverrunPct": 18.4,
-  "flaggedForRetraining": true,
-  "recommendedTrainingModules": ["TH001"]
+  "operatorId": "OP-03",
+  "operatorNeedsAttention": true,
+  "signalsFired": ["safety", "task"],
+  "evidence": {
+    "safetyIncidentCount": 2,
+    "idlingSessionCount": 0,
+    "overrunTaskCount": 2
+  },
+  "recommendation": "Consider refresher training: Maintaining Safety Standards Under Time Pressure.",
+  "recommendedModuleId": "TH_SAFETY_UNDER_PRESSURE",
+  "recommendedModuleTitle": "Maintaining Safety Standards Under Time Pressure"
 }
 ```
-This is the concrete endpoint behind §7.3's cross-feature synthesis — NestJS computes it by joining `operations.csv` (safety alert history) and `tasks.csv` (overrun history, via the now-shared `operator_id`) per operator, at request time or on a cached interval (see §8.4).
+
+`signalsFired`: subset of `["safety", "behavior", "task"]`, each computed independently (safety = seatbelt/proximity only, behavior = idling only, task = overrun only — deliberately not derived from `safety_alert_triggered`, which conflates idling with safety per the dataset's generation rule; see `data-ml/cross_feature.py`'s "AUDIT FIX" note). `operatorNeedsAttention` requires **2 of 3** signals fired, not just one. `recommendedModuleId` is one of the 4 fixed training-hub module IDs (`TH_SAFE_EFFICIENT_OPS`, `TH_SAFETY_UNDER_PRESSURE`, `TH_TIME_MANAGEMENT`, `TH_GENERAL_REFRESHER`), matching `GET /training-hub`'s actual content — see §5.
+
+Returns `404` if `operatorId` doesn't exist in either dataset. Thresholds (safety incident count ≥2, idling session count ≥2, overrun task count ≥2, task overrun ≥15%) are fixed constants matching `data-ml/thresholds.py` exactly — do not diverge between the TypeScript and Python implementations.
+
+NestJS computes this by filtering the in-memory `operations.csv`/`tasks.csv` (loaded once at startup) per operator — see §8.4 for the caching recommendation once this becomes an expensive/frequent call.
 
 ## 10. `GET /health` — Service Health Check (Both NestJS and FastAPI)
 
@@ -216,6 +230,79 @@ Response:
 { "status": "ok", "uptime": 3421, "pythonServiceReachable": true }
 ```
 NestJS's `/health` should itself check FastAPI's health (a short-timeout ping) and report `pythonServiceReachable` — this is what §8's circuit-breaker logic (below) uses to decide whether to call the model or go straight to fallback, instead of waiting for every request to time out individually.
+
+## 11. `GET /machines/:machineId/health` — Machine Health Score (Supports §7.4)
+
+Response:
+```json
+{
+  "machineId": "M-06",
+  "score": 58,
+  "status": "NEEDS_ATTENTION",
+  "componentScores": {
+    "wearUsageLoad": 12.0,
+    "fuelEfficiencyDrift": 8.5,
+    "idlingBurden": 10.0,
+    "incidentAssociation": 15.0,
+    "serviceIntervalProximity": 12.5
+  },
+  "contributingFactors": [
+    "engine hours 4210 — above fleet median",
+    "fuel use trending 14% above this machine's own baseline",
+    "9 sessions with idling over 45 min threshold",
+    "2 proximity incidents recorded on this machine",
+    "approaching typical service interval (est. 290 engine hours remaining)"
+  ],
+  "sessionsAnalyzed": 41
+}
+```
+`status` bands, matching the Operator Score's convention exactly: `EXCELLENT` 85-100, `GOOD` 65-84, `NEEDS_ATTENTION` 40-64, `CRITICAL` 0-39. `componentScores` sum to `score`; exact weights TBD by Dev when implemented (mirror the Operator Score's approach of weighting the most safety-relevant component highest — likely `incidentAssociation` or `wearUsageLoad`).
+
+Computed by aggregating `operations.csv` per `machine_id` instead of per `operator_id` — same computation pattern as the Operator Performance Score (see data/ML handoff docs), no new data fields required.
+
+## 12. `GET /machines` — Fleet-Wide Machine Health List (Supports §7.4)
+
+Response: array of the same shape as §11, one entry per machine (10 total), for a fleet-overview dashboard view. Supports pagination — see §8.2.
+
+## 13. `GET /machines/:machineId/zone-status` — Zone + Compound SOS Status (Supports README §7.5)
+
+**Draft — not yet implemented, confirm shape with the team before building.**
+
+Response:
+```json
+{
+  "machineId": "M-06",
+  "currentZone": "Restricted Zone",
+  "zoneDangerTier": "high",
+  "machineHealthScore": 32,
+  "sosActive": true,
+  "sosReason": "Machine health score 32 (below CRITICAL threshold) while in a high-danger zone"
+}
+```
+`sosActive` is the compound trigger from README §7.5: `true` only when `machineHealthScore` is below the CRITICAL threshold (see §11's status bands — below 40) **and** `zoneDangerTier == "high"`. Requires §11's Machine Health Score to already be computed — this endpoint calls that logic internally rather than duplicating it. Requires `current_zone` added to `operations.csv` (not yet present — new data requirement, see README §7.5).
+
+## 14. `GET /fleet/cost-summary` — Site-Wide Cost/ROI Rollup (Supports README §7.6)
+
+**Draft — not yet implemented, confirm shape with the team before building.**
+
+Response:
+```json
+{
+  "totalIdleCostEstimate": 842.50,
+  "totalOverrunCostEstimate": 1230.00,
+  "totalIncidentCount": 12,
+  "topRiskOperators": [
+    { "operatorId": "OP-06", "estimatedCostImpact": 310.00 }
+  ],
+  "topRiskMachines": [
+    { "machineId": "M-06", "estimatedCostImpact": 415.00 }
+  ],
+  "machinesNearingServiceInterval": [
+    { "machineId": "M-06", "estimatedDowntimeCostAvoided": 2000.00 }
+  ]
+}
+```
+Cost figures are illustrative — exact per-unit dollar assumptions (fuel cost per idle-minute, delay cost per overrun-minute, downtime cost per unplanned-maintenance event) need to be fixed as constants (same discipline as the rule thresholds — define once, document here, never diverge) before this is built. Pure aggregation/arithmetic over §9 (operator summaries) and §11/§12 (machine health) — no new data or ML required.
 
 ---
 
@@ -328,3 +415,9 @@ Record any change made after the Hour 0:30 lock, so nobody works against a stale
 |---|---|---|
 | — | initial draft | Ripun (drafted solo, pending team confirmation) |
 | — | added `POST /predict-safety-risk` (§4.1), added `operator_id` to `tasks.csv` for §7.3 cross-feature synthesis | Ripun, per team decision on 4 differentiator features |
+| — | added `GET /machines/:machineId/health` (§11) and `GET /machines` (§12) for §7.4 Machine Health Score — no changes to any existing endpoint or dataset schema, uses existing `operations.csv` fields aggregated by `machine_id` | Ripun, per new feature decision |
+| — | **applied:** Dev's `CONTRACTS_PATCH.md` fields (`training_completed_recent` on `operations.csv`, `timestamp` on `tasks.csv`, `operator_id` already covered above) confirmed present after merging `data` branch into `backend`. | Ripun, after merge |
+| — | added `machine_id` to `tasks.csv` (was missing — no operator-machine affinity exists in `operations.csv` to preserve, so assigned via seeded deterministic randomization) to satisfy §1's `/tasks` response shape. Applied identically on both `backend` and `data` branches. | Ripun |
+| — | rewrote §9 `/operators/:operatorId/summary` response shape to match Dev's actual `cross_feature.py` output (`operatorNeedsAttention`/`signalsFired`/`evidence`/`recommendation`) — the original placeholder shape was written before that logic existed and is no longer accurate. Implemented and verified to match Dev's reference output exactly. | Ripun |
+| — | `GET /training-hub` implemented — serves `data-ml/data/training-content.json`, 4 modules with IDs matching §9's cross-feature module recommendations exactly. | Ripun |
+| — | added draft (not yet implemented) endpoints `GET /machines/:machineId/zone-status` (§13, supports README §7.5 zone tracker + compound SOS) and `GET /fleet/cost-summary` (§14, supports README §7.6 cost/ROI + fleet rollup). Reconciles README §7's differentiator list with CONTRACTS.md, which was missing these two features entirely despite being discussed and agreed on. | Ripun |

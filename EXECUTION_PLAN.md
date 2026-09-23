@@ -14,16 +14,20 @@ Referenced files: [`README.md`](./README.md) (problem statement, design reasonin
 - **Branches:** `main`, `frontend`, `backend`, `data`. Created once at the start (§1.2).
 - **Ports:** NestJS `3000`, FastAPI `8001`, Next.js `3001`.
 - **Package managers:** `npm` for both Node projects (NestJS backend, Next.js frontend). `pip` + a virtualenv for the Python service.
-- **Folder layout (create exactly this):**
+- **Folder layout (actual, as of the `data` branch merge — supersedes any earlier `/data` references below):**
   ```
   /backend          ← NestJS project
   /frontend         ← Next.js project
-  /ml-service       ← FastAPI project
-  /data             ← generated CSVs + data-generation script
+  /ml-service       ← FastAPI project (not yet created)
+  /data-ml          ← Dev's data generation, validation, training, scoring, and handoff docs
+    /data           ← generated CSVs (operations.csv, tasks.csv) live here, i.e. data-ml/data/
+    /model          ← trained model artifacts (task_time_pipeline.joblib, metrics.json)
+    /outputs        ← generated JSON snapshots (operator_scores.json, alert_reasoning.json, cross_feature_insights.json)
   CONTRACTS.md
   README.md
   EXECUTION_PLAN.md
   ```
+  Originally specced as a repo-root `/data` folder — kept as `data-ml/` instead to avoid disrupting Dev's already-built, tested pipeline (his scripts' internal relative paths assume this structure). Any instruction below referencing `/data` or `data/operations.csv` means `data-ml/data/operations.csv` in the actual repo.
 - **Naming convention:** CSV files use `snake_case` headers. All JSON over HTTP uses `camelCase`. The mapping table for each field is in `CONTRACTS.md`'s "API boundary mapping" notes — use those exact mappings, do not invent new ones.
 - **Every timestamp** is ISO 8601 UTC (`2026-09-24T08:15:00Z` format).
 - **Every ID field** uses the exact prefixes already fixed in `CONTRACTS.md`: `M-01`..`M-10` (machines), `OP-01`..`OP-15` (operators), `T001`, `T002`... (tasks), `A001`... (alerts), `F001`... (behavior flags), `TH001`... (training modules), `I001`... (incidents).
@@ -136,9 +140,9 @@ In each controller, implement the `GET`/`POST` route from `CONTRACTS.md` §1, §
 
 **Deliverable at 1:00:** `npm run start:dev` serves all 5 stub endpoints on port 3000 — push immediately so Anamika is unblocked.
 
-**Step 2 (1:00–2:00): Real rule logic**
-Wait for Dev's `data/operations.csv` and `data/tasks.csv` hand-off (Dev's Step 1, target 1:15). Once available:
-- Create `src/data/data-loader.service.ts` — reads `operations.csv` and `tasks.csv` from the `/data` folder at startup (use the `csv-parse` npm package: `npm install csv-parse`), parses into in-memory arrays of objects, converts `snake_case` CSV headers to `camelCase` per `CONTRACTS.md`'s API boundary mapping tables.
+**Step 2: Real rule logic**
+Dev's `data-ml/data/operations.csv` and `data-ml/data/tasks.csv` are merged and available (see `data-ml/BACKEND_HANDOFF.md` for full integration notes — it documents field mappings, model loading, and gotchas in more detail than restated here).
+- Create `src/data/data-loader.service.ts` — reads `operations.csv` and `tasks.csv` from `../data-ml/data/` at startup (use the `csv-parse` npm package: `npm install csv-parse`), parses into in-memory arrays of objects, converts `snake_case` CSV headers to `camelCase` per `CONTRACTS.md`'s API boundary mapping tables.
 - Create `src/rules/rules.service.ts` implementing exactly these three rules, using the **finalized thresholds** from `CONTRACTS.md`'s "Thresholds (FINALIZED)" section — do not invent different numbers:
   ```ts
   const IDLING_THRESHOLD_MIN = 45;
@@ -196,7 +200,12 @@ When Dev hands off the trained model file (target 2:30, §3 below), replace the 
 
 ---
 
-### 2.3 Dev — Data + Model Training (hand off to Ripun at ~2:30), then Training Hub
+### 2.3 Dev — Data + Model Training — SUPERSEDED, SEE NOTE
+
+**✅ Status: complete, merged into `backend` from `origin/data`.** The steps below describe the *original* plan for this work; Dev's actual implementation went beyond it (15 operators with distinct behavioral archetypes for realistic correlated data rather than independent-random columns, a validation script gating training on schema/consistency checks, plus the Operator Performance Score, alert reasoning, and cross-feature synthesis — none of which were in the original scope). The steps below are kept for historical reference only — **do not re-run or redo this work.** For what actually exists and how to integrate it, read `data-ml/BACKEND_HANDOFF.md` and `data-ml/FRONTEND_HANDOFF.md` instead; those are the current source of truth for this layer.
+
+<details>
+<summary>Original plan (superseded — click to expand)</summary>
 
 **Step 1 (0:30–1:15): Dataset generator**
 ```
@@ -278,12 +287,12 @@ git push origin data
 ```
 (Do not commit the `.joblib` binary to the `data` branch — copy it directly into `ml-service/` on Ripun's `backend` branch, or place it in a shared local folder both can access, since it's a build artifact, not source.)
 
-**Step 3 (2:30–3:00): Training hub content, or help Anamika**
-If Anamika is on schedule: write `data/training-content.json`, an array of 3-4 objects matching `CONTRACTS.md` §5's shape (`moduleId`, `title`, `format: "article"`, `content`). Suggested titles: "Safe Excavation Practices," "Proper Seatbelt & Proximity Protocols," "Reading Your Task-Time Estimate," "Handling Adverse Weather Conditions." Content: 150-300 words of plausible plain-text guidance each. Hand the JSON file to Ripun to load into `training.controller.ts`.
+</details>
 
-If Anamika is behind schedule: pause this and directly assist her (frontend has no strict single-owner requirement at this stage — extra hands on any of §2.1's steps is more valuable than training-hub polish).
+**Actual outcome:** the model exists at `data-ml/model/task_time_pipeline.joblib` (already merged into `backend`), with real evaluation metrics in `data-ml/model/metrics.json` (test R² 0.93, MAE ~4 min — a legitimately validated model, not just fit-and-forget). `data-ml/predict.py` has a reference implementation for loading and calling it; `data-ml/BACKEND_HANDOFF.md` §1 has the exact FastAPI wiring code, including the correct field-name mapping and an explicit warning that `predict.py`'s own fallback is a placeholder, not the real weighted-average formula to use.
 
-**Deliverable by 3:00:** both CSVs available to Ripun, model handed off (or documented reason it isn't, with Ripun's fallback already covering the gap), training-hub content ready if time allowed.
+**Step 3: Training hub content — still outstanding, not yet done**
+Write `data-ml/data/training-content.json` (or wherever the team agrees), an array of 3-4 objects matching `CONTRACTS.md` §5's shape (`moduleId`, `title`, `format: "article"`, `content`). Suggested titles: "Safe Excavation Practices," "Proper Seatbelt & Proximity Protocols," "Reading Your Task-Time Estimate," "Handling Adverse Weather Conditions." Content: 150-300 words of plausible plain-text guidance each. Hand the JSON file to Ripun to load into `training.controller.ts`. This is genuinely not done yet and isn't covered by anything in the data-ml handoff — needs explicit follow-up with Dev or Anamika.
 
 ---
 
@@ -328,7 +337,7 @@ Fix anything the dry run surfaced. If nothing broke, spend remaining time on UI 
 
 ## 6. Hour 5+ — Differentiator Features (Only Start After §3's Integration Pass Is Clean)
 
-Full rationale: `README.md` §7. Build order below is fixed — do not reorder.
+Full rationale: `README.md` §7 (6 features total, §7.1–§7.6). Build order below is fixed — do not reorder; later sections depend on earlier ones (§6.5 needs §6.4 done, §6.6 needs §6.3/§6.4 done).
 
 ### 6.1 Why-was-I-flagged (Anamika, ~30 min)
 On the safety-alerts and behavior-flags pages, make each alert/flag card display its `message` field prominently (large text, not a tooltip) — this field already exists in the API response from §2.2 Step 2. No backend change. No new endpoint. Just a UI-prominence change.
@@ -369,7 +378,12 @@ Add `src/prediction/safety-risk.controller.ts` in NestJS calling this new Python
 
 Surface it on the frontend (Anamika, small addition): on the safety-alerts page, show the risk score + top factors alongside each machine's current session if available.
 
-### 6.3 Cross-feature synthesis (Dev: logic, Anamika: UI, ~1–1.5 hrs)
+### 6.3 Cross-feature synthesis — ✅ DONE, SEE NOTE
+
+**Status: complete and verified.** The steps below describe the *original* plan for this feature — a self-contained placeholder join logic written before Dev's actual `cross_feature.py` existed. Dev's real implementation is more rigorous (independently-computed safety/behavior/task signals avoiding the double-counting bug described in `data-ml/cross_feature.py`'s "AUDIT FIX" comment, a proper 2-of-3 conjunctive trigger, and specific training-module recommendations per signal combination). Ripun ported it faithfully to `backend/src/operators/cross-feature.service.ts` + `operators.controller.ts`, implementing `GET /operators/:operatorId/summary`, and verified the output matches Dev's Python reference exactly on multiple test cases. `CONTRACTS.md` §9 has been rewritten to reflect the real (better) response shape. The plan below is kept for historical reference only — **do not rebuild this.**
+
+<details>
+<summary>Original plan (superseded — click to expand)</summary>
 
 Requires `operator_id` already present in `tasks.csv` (added in §2.3 Step 1 — confirm it's there before starting this).
 
@@ -397,7 +411,29 @@ function getOperatorSummary(operatorId: string) {
 
 **Anamika's part:** new page `app/operators/[operatorId]/page.tsx` showing the summary, with `flaggedForRetraining: true` rendering a visible banner linking to `/training` (the training hub page from §2.1).
 
-**Stop condition:** if the second panel review is approaching and this isn't done, skip it — it's the lowest-priority of the remaining 3 differentiators (see `README.md` §7.3).
+</details>
+
+**Anamika's part is still outstanding** (frontend page consuming the real endpoint) — the note above only covers the backend logic being superseded, not the UI work.
+
+### 6.4 Machine Health Score (Dev: score computation, Ripun: endpoint, Anamika: UI — not yet started)
+
+**Blocked on Dev.** Ask: build `machine_scoring.py`, mirroring `data-ml/scoring.py`'s structure exactly but grouped by `machine_id` instead of `operator_id`. Component factors and their data sources are fully specified in `README.md` §7.4 — wear/usage load (`engine_hours`, `load_cycles`), fuel efficiency drift (`fuel_used_l` vs. the machine's own historical baseline), idling burden (`idling_time_min` per machine), incident association (safety alerts tied to `machine_id` regardless of operator), service-interval proximity (`engine_hours` vs. a defined threshold). No new data fields required — pure aggregation over the existing `operations.csv`.
+
+Once Dev hands off the score computation (as a script, same pattern as `scoring.py`, or as a JSON snapshot like `operator_scores.json`), Ripun's work is the same shape as §6.3: port the logic into a NestJS service, wire `GET /machines/:machineId/health` and `GET /machines` per `CONTRACTS.md` §11/§12, verify output matches Dev's reference exactly before considering it done.
+
+**Anamika's part:** machine score cards/gauges, same visual language as whatever the operator score UI ends up looking like.
+
+### 6.5 Zone-Based Asset Tracker + Compound SOS (blocked on §6.4 — not yet started)
+
+**Blocked on §6.4 being done AND new data from Dev.** Full rationale and design: `README.md` §7.5. Concretely, ask Dev for: (1) `current_zone` added to `operations.csv`'s generator (fixed set of 4-5 zones), (2) a static zone→danger-tier config, (3) the compound SOS trigger logic (`machineHealthScore < CRITICAL_THRESHOLD AND zone.dangerTier == "high"`), mirroring the pattern of `alert_reasoning.py`. Draft endpoint: `CONTRACTS.md` §13 (`GET /machines/:machineId/zone-status`) — confirm/finalize the shape with the team before building, it's marked draft, not locked.
+
+**Anamika's part is the real cost here** — a 2D canvas/map component is a genuinely new, non-trivial frontend build compared to the list-based views already done. Budget time accordingly; this is the most expensive remaining differentiator.
+
+### 6.6 Cost/ROI Translation + Fleet Rollup (not yet started, low complexity, no blockers once §6.3/§6.4 exist)
+
+Full rationale: `README.md` §7.6. Three components, roughly independent: (1) cost translation — pure multiplier arithmetic on existing idling/overrun/incident data, no blockers at all; (2) fleet/site-level rollup — aggregates §6.3's operator summaries and §6.4's machine health scores, so needs those to exist first but is otherwise just a sum/aggregation, no new data; (3) predictive-maintenance cost avoidance — extends §6.4's service-interval-proximity component with a dollar figure. Draft endpoint: `CONTRACTS.md` §14 (`GET /fleet/cost-summary`) — cost-per-unit constants (fuel cost/idle-minute, delay cost/overrun-minute, downtime cost/maintenance event) need to be fixed and documented before implementation, same discipline as the rule thresholds.
+
+**Stop condition:** if the second panel review is approaching and §6.4–§6.6 aren't done, prioritize in this order: finish §6.3's frontend page first (cheapest, already has working backend), then §6.6's cost translation (cheap, high narrative value for the panel), then §6.4 (Machine Health) if time allows, then §6.5 (zone tracker) only if there's real slack — it's the most expensive and lowest-priority given the frontend cost.
 
 ---
 
