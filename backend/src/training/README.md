@@ -10,8 +10,8 @@ Isolated into its own module/controller per the codebase's one-outcome-per-folde
 
 ## How
 
-`training.controller.ts` exposes a single `GET /training-hub` route. Currently returns a hardcoded array matching the exact shape defined in `../../../CONTRACTS.md` §5. Per the root `README.md` §4's scope decision, this build uses the "article" format (static e-learning-style content) rather than instructor booking or simulation modules.
+`training.controller.ts` loads `data-ml/data/training-content.json` once at startup and serves it as-is from `GET /training-hub`. Per the root `README.md` §4's scope decision, this build uses the "article" format (static e-learning-style content) rather than instructor booking or simulation modules. The 4 module IDs (`TH_SAFE_EFFICIENT_OPS`, `TH_SAFETY_UNDER_PRESSURE`, `TH_TIME_MANAGEMENT`, `TH_GENERAL_REFRESHER`) match exactly what `../operators/cross-feature.service.ts` references for its training recommendations (§9) — not arbitrary IDs.
 
 ## File Responsibilities
 
-- **`training.controller.ts`** — defines `TrainingController`, routed at `/training-hub`. `findAll()` handles `GET /training-hub` and currently returns one stub module. Depends on nothing else yet. Depended on by `../app.module.ts`. Will be updated to serve Dev's authored training content (`data/training-content.json`, per `EXECUTION_PLAN.md` §2.3 Step 3) once that hand-off happens.
+- **`training.controller.ts`** — defines `TrainingController`, routed at `/training-hub`. `onModuleInit()` reads and parses the JSON file once; `findAll()` handles `GET /training-hub` and returns the cached array. Depended on by `../app.module.ts`.

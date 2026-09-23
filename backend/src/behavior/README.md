@@ -10,8 +10,8 @@ Isolated into its own module/controller per the codebase's one-outcome-per-folde
 
 ## How
 
-`behavior.controller.ts` exposes a single `GET /behavior-flags` route. Currently returns a hardcoded array matching the exact shape defined in `../../../CONTRACTS.md` §3. This is the stub phase — the real implementation will compute flags from the loaded dataset (idling time over threshold, repeated safety alerts per operator) rather than returning static data.
+`behavior.controller.ts` exposes `GET /behavior-flags`, computing flags from the loaded `operations.csv` dataset via `RulesService.computeBehaviorFlags()` (`../rules/`) — idling time over threshold (45 min), repeated safety alerts per operator (3+), both fixed rule thresholds rather than a model. Supports pagination (`?page&pageSize`, §8.2).
 
 ## File Responsibilities
 
-- **`behavior.controller.ts`** — defines `BehaviorController`, routed at `/behavior-flags`. `findAll()` handles `GET /behavior-flags` and currently returns the stub flag list. Depends on nothing else yet. Depended on by `../app.module.ts`. Will be updated to call a rules service (not yet created) once Dev's `data/operations.csv` is available — see `EXECUTION_PLAN.md` §2.2 Step 2 for the exact rule logic this will implement (idling threshold 45 min, unsafe-pattern threshold 3+ alerts per operator, per `../../../CONTRACTS.md`'s finalized thresholds).
+- **`behavior.controller.ts`** — defines `BehaviorController`, routed at `/behavior-flags`. `findAll()` handles `GET /behavior-flags`, loads operations via `DataLoaderService`, computes flags via `RulesService`, and wraps the result with `paginate()` (`../common/pagination.ts`). Depended on by `../app.module.ts`.

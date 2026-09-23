@@ -10,8 +10,8 @@ Isolated into its own module/controller per the codebase's one-outcome-per-folde
 
 ## How
 
-`safety.controller.ts` exposes a single `GET /safety-alerts` route. Currently returns a hardcoded array matching the exact shape defined in `../../../CONTRACTS.md` §2. This is the stub phase — the real implementation will compute alerts from the loaded dataset using fixed, deterministic rule thresholds (seatbelt unfastened, proximity < 3m) rather than returning static data, per the "safety stays rule-based/explainable" design decision in the root `README.md` §2.
+`safety.controller.ts` exposes `GET /safety-alerts`, computing alerts from the loaded `operations.csv` dataset via `RulesService.computeSafetyAlerts()` (`../rules/`) — fixed, deterministic rule thresholds (seatbelt unfastened, proximity < 3m), not a model, per the "safety stays rule-based/explainable" design decision in the root `README.md` §2. Supports pagination (`?page&pageSize`, §8.2).
 
 ## File Responsibilities
 
-- **`safety.controller.ts`** — defines `SafetyController`, routed at `/safety-alerts`. `findAll()` handles `GET /safety-alerts` and currently returns the stub alert list. Depends on nothing else yet. Depended on by `../app.module.ts`. Will be updated to call a rules service (not yet created) once Dev's `data/operations.csv` is available — see `EXECUTION_PLAN.md` §2.2 Step 2 for the exact rule logic this will implement.
+- **`safety.controller.ts`** — defines `SafetyController`, routed at `/safety-alerts`. `findAll()` handles `GET /safety-alerts`, loads operations via `DataLoaderService`, computes alerts via `RulesService`, and wraps the result with `paginate()` (`../common/pagination.ts`). Depended on by `../app.module.ts`.
