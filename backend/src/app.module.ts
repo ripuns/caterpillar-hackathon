@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TasksController } from './tasks/tasks.controller';
@@ -10,7 +11,7 @@ import { DataLoaderService } from './data/data-loader.service';
 import { RulesService } from './rules/rules.service';
 
 @Module({
-  imports: [],
+  imports: [HttpModule],
   controllers: [AppController, TasksController, SafetyController, BehaviorController, TrainingController, PredictionController],
   providers: [AppService, DataLoaderService, RulesService],
 })
