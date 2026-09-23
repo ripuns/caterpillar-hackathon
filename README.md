@@ -51,15 +51,15 @@ See [`EXECUTION_PLAN.md`](./EXECUTION_PLAN.md) for the detailed phase-by-phase, 
 
 **Task time estimation → real regression model.** Train on `Task Type, Weather, Operator Skill, Machine Age → Actual Time` (§3.1). A small Python/scikit-learn model (even plain linear regression or a small decision tree) trained on the synthetic dataset, wrapped in one endpoint (`POST /predict-task-time`), called from NestJS. This is the genuine "intelligent" element and the strongest panel talking point — it's real learned prediction, not a hardcoded average.
 
-**Everything else stays rule-based** (safety alerts, unusual-behavior detection) — deliberate choice, not a shortcut: deterministic logic is auditable and appropriate for safety-critical features, and it's also simply not what the new dataset is shaped for.
+**Individual safety-rule detection and unusual-behavior detection stay rule-based** (seatbelt, proximity, idling threshold) — deliberate choice, not a shortcut: deterministic per-violation logic is auditable and appropriate for safety-critical features. **Composite safety risk scoring is a second ML model, layered on top of those same rule-detected features** — see §7.3. This is not a contradiction: the inputs to the score are still rule-computed and inspectable; only the *combination* into a single risk number is learned, and it's always shown with its contributing factors so it stays explainable.
 
 **Optional stretch (only if core is done early):** a thin conversational layer — operator asks "what's my next task?" — as a direct LLM API call from NestJS, grounded in the app's own data. Not required; do not start this before the must-haves are solid.
 
 ---
 
-**Tech stack: NestJS backend + React/Next.js frontend + one small Python microservice for the task-time model.**
+**Tech stack: NestJS backend + React/Next.js frontend + one Python microservice hosting both ML models.**
 - NestJS: dashboard API, rule engine, persistence, orchestration — plays to the team's speed.
-- Python/FastAPI: single `/predict-task-time` endpoint wrapping a scikit-learn model trained on §3.1's dataset. Kept deliberately narrow — see §5.4 for the integration contract.
+- Python/FastAPI: `/predict-task-time` (core, §2.1) and `/predict-safety-risk` (stretch, §7.3) — two endpoints in the same service, both scikit-learn models trained on the same dataset files. Kept deliberately narrow — see §5.4 for the integration contract.
 - Local persistence: SQLite or structured JSON/CSV files read by NestJS — no external DB needed under this timeline.
 
 ---
@@ -114,10 +114,66 @@ This table is a starting draft — revise once the full problem statement and an
 
 Given 24 hours and 3 people:
 - **Must-have (core demo):** daily task dashboard, seatbelt + proximity safety rules with visible alerts, excessive-idling detection, one training-hub format (recommend e-learning/static content), task-time estimate live (real trained model if ready by the integration pass, Ripun's weighted-average fallback otherwise — either is an acceptable must-have result, per `EXECUTION_PLAN.md`).
-- **Nice-to-have if ahead of schedule:** incident logging as a full searchable log rather than a flat list, tuning/improving the regression model's accuracy, a second training-hub format, a "mission-oriented" extensibility angle made visible in the UI (e.g., a toggle showing "this scales to fleet view").
+- **Nice-to-have if ahead of schedule:** the 4 differentiator features in §7 (build only after the must-haves above are solid), incident logging as a full searchable log rather than a flat list, tuning/improving the regression model's accuracy, a second training-hub format.
 - **Cut first if behind schedule:** instructor booking / simulation modules (high effort, low payoff vs. e-learning), elaborate incident-log search/filter UI.
 
 Re-confirm this list as a team once roles are assigned and the full problem statement is reviewed.
+
+---
+
+## 7. Differentiator Features (Post-Core, Stretch — Build After §4.1 Must-Haves Are Solid)
+
+These exist to make the build stand out beyond the baseline 5 outcomes — the panel's stated interest is in ideas that could genuinely solve problems for Caterpillar, not just a completed checklist. Build order below is deliberate: cheapest/lowest-risk first, riskiest (new ML model) after the core is proven stable.
+
+### 7.1 Why-Was-I-Flagged (Alert Transparency)
+
+Surface the exact rule and values behind each safety alert in plain language on the frontend, prominently — not buried. The data already exists in `/safety-alerts`' `message` field (`CONTRACTS.md` §2); this is a UI treatment change, not new backend work. Reinforces the "explainable, not black-box" story that's already core to your safety architecture.
+
+**Owner:** Anamika (pure frontend). **Effort:** near-zero — no new endpoint needed.
+
+### 7.2 Live "What-If" Task-Time Simulator
+
+Let the operator/coordinator tweak inputs (task type, weather, skill, machine age) on a form and see the `/predict-task-time` prediction update live, before committing to a task. Reuses the existing endpoint exactly as-is — pure frontend addition, no backend changes.
+
+**Owner:** Anamika (frontend), calling Ripun's existing endpoint. **Effort:** low — a form + re-fetch on change.
+
+### 7.3 Composite Safety Risk Score (ML-Based)
+
+A second trained model — logistic regression, chosen specifically for interpretability — outputs a continuous safety risk score (0–1) per session, trained on `operations.csv`'s rule-violation features (seatbelt status, proximity, idling time). **Not a re-encoding of the existing OR-based alert rule** — the model should capture *interactions* between features (e.g., unfastened + high idling together carries disproportionately higher risk than either alone) that a simple OR rule can't express.
+
+**Why logistic regression specifically:** its coefficients are directly inspectable, the same way the task-time regression's are. This keeps the safety layer defensible to the panel — every score must be shown alongside its contributing factors (§7.1's transparency pattern applies here too), never presented as an opaque number. This is a deliberate reframe of §2's "safety is fully rule-based" language: **individual violation detection stays rule-based** (seatbelt/proximity/idling — these are the model's input features, computed exactly as before), **while composite risk scoring is now genuinely ML-based**, always shown with its contributing factors.
+
+Served via a new endpoint, `POST /predict-safety-risk` (see `CONTRACTS.md`) — same Python/FastAPI service and integration pattern as `/predict-task-time`, so the architectural cost is low; it's the same pipeline, a second model.
+
+**Owner:** Dev (train/validate model), Ripun (FastAPI wrapper + NestJS integration — same split reasoning as §5.4 for task-time). **Effort:** moderate — reuses an already-built pattern.
+
+### 7.4 Cross-Feature Synthesis
+
+Dashboard surfaces correlations across an operator's own history — e.g., "this operator has 3+ safety alerts and consistently overruns estimated task time — may need retraining," with a direct link into the training hub. This is the feature that most literally fulfills "end-to-end intelligent companion": it's the difference between 5 disconnected features and a system that reasons across its own data.
+
+**Requires:** `operator_id` added to `tasks.csv` (currently missing — see `CONTRACTS.md` schema update) so safety-alert history and task-time-overrun history can be joined per operator. Without this field, this feature cannot be built — confirm the schema change with Dev before he finalizes data generation.
+
+**Owner:** Dev (the join/aggregation logic) + Anamika (surfacing it on the dashboard). **Effort:** moderate-high — build last, after §7.1–7.3 are done, since it depends on data from both datasets being stable.
+
+**Backing endpoint:** `GET /operators/:operatorId/summary` — see `CONTRACTS.md` §9.
+
+---
+
+## 7.5 Production Hardening (Post-Differentiators — See `CONTRACTS.md` §8)
+
+Once §7's 4 differentiator features are done, if time remains, push the build from "working demo" toward "something that could plausibly run for real" — this is what separates a hackathon checklist from something Caterpillar mentors would actually see as a credible engineering pattern, not just a feature list:
+
+- **Write endpoints**: `PATCH /tasks/:taskId` (status updates), `POST /incidents` (manual incident logging — this one directly closes a gap against the problem statement's own "incident logging" outcome, which until now only had system-generated alerts, not operator-entered ones).
+- **Input validation** on every write (reject malformed/unknown-enum data with `400` before it reaches business logic).
+- **Pagination** on list endpoints so a growing dataset doesn't dump hundreds of rows per response.
+- **Standard error shape** shared across NestJS and FastAPI, so the frontend has one error-handling path.
+- **Caching** on the expensive per-operator rollup (§7.4's backing endpoint).
+- **Circuit breaker** on the NestJS→Python call, using a `/health` check, instead of waiting out a timeout on every prediction.
+- **Structured logging** of every rule trigger and every ML prediction (input + output) — this becomes a real audit trail, giving the "explainable, not black-box" narrative (§2) actual evidence rather than just a claim.
+- **API versioning** (`/api/v1/...`) — ties into the "mission-oriented, could extend to fleet-wide" framing already in §2.
+- **Basic write-endpoint auth** and **idempotent retries** on `POST /incidents` — lowest priority, cut first if time is short.
+
+Full endpoint shapes, priority order, and detail: `CONTRACTS.md` §6–§10 (new endpoints) and §8 (hardening checklist). Do not start this before §7's differentiators — this is depth on top of features that already exist, not a replacement for having the features.
 
 ---
 
