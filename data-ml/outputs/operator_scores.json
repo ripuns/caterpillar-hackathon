@@ -1,0 +1,305 @@
+[
+  {
+    "operatorId": "OP-01",
+    "score": 96,
+    "status": "EXCELLENT",
+    "componentScores": {
+      "safetyCompliance": 36.5,
+      "taskPerformance": 29.8,
+      "machineUseBehavior": 20.0,
+      "trainingStatus": 10
+    },
+    "contributingFactors": [
+      "2 session(s) with proximity below 3.0m",
+      "0% average task-time overrun across 14 tasks",
+      "no excessive-idling sessions on record",
+      "training completed recently"
+    ],
+    "sessionsAnalyzed": 34,
+    "tasksAnalyzed": 14
+  },
+  {
+    "operatorId": "OP-02",
+    "score": 97,
+    "status": "EXCELLENT",
+    "componentScores": {
+      "safetyCompliance": 37.1,
+      "taskPerformance": 30.0,
+      "machineUseBehavior": 20.0,
+      "trainingStatus": 10
+    },
+    "contributingFactors": [
+      "1 session(s) with proximity below 3.0m",
+      "tasks completed at or under estimate on average (-1%)",
+      "no excessive-idling sessions on record",
+      "training completed recently"
+    ],
+    "sessionsAnalyzed": 21,
+    "tasksAnalyzed": 18
+  },
+  {
+    "operatorId": "OP-03",
+    "score": 93,
+    "status": "EXCELLENT",
+    "componentScores": {
+      "safetyCompliance": 35.7,
+      "taskPerformance": 27.7,
+      "machineUseBehavior": 20.0,
+      "trainingStatus": 10
+    },
+    "contributingFactors": [
+      "2 session(s) with proximity below 3.0m",
+      "4% average task-time overrun across 16 tasks",
+      "2 task(s) overran by 15%+",
+      "no excessive-idling sessions on record",
+      "training completed recently"
+    ],
+    "sessionsAnalyzed": 28,
+    "tasksAnalyzed": 16
+  },
+  {
+    "operatorId": "OP-04",
+    "score": 98,
+    "status": "EXCELLENT",
+    "componentScores": {
+      "safetyCompliance": 38.1,
+      "taskPerformance": 29.4,
+      "machineUseBehavior": 20.0,
+      "trainingStatus": 10
+    },
+    "contributingFactors": [
+      "1 session(s) with seatbelt unfastened",
+      "1% average task-time overrun across 12 tasks",
+      "1 task(s) overran by 15%+",
+      "no excessive-idling sessions on record",
+      "training completed recently"
+    ],
+    "sessionsAnalyzed": 32,
+    "tasksAnalyzed": 12
+  },
+  {
+    "operatorId": "OP-05",
+    "score": 92,
+    "status": "EXCELLENT",
+    "componentScores": {
+      "safetyCompliance": 40.0,
+      "taskPerformance": 21.9,
+      "machineUseBehavior": 20.0,
+      "trainingStatus": 10
+    },
+    "contributingFactors": [
+      "no seatbelt or proximity violations on record",
+      "13% average task-time overrun across 16 tasks",
+      "8 task(s) overran by 15%+",
+      "no excessive-idling sessions on record",
+      "training completed recently"
+    ],
+    "sessionsAnalyzed": 28,
+    "tasksAnalyzed": 16
+  },
+  {
+    "operatorId": "OP-06",
+    "score": 30,
+    "status": "CRITICAL",
+    "componentScores": {
+      "safetyCompliance": 0.0,
+      "taskPerformance": 29.7,
+      "machineUseBehavior": 0.0,
+      "trainingStatus": 0.0
+    },
+    "contributingFactors": [
+      "2 session(s) with seatbelt unfastened",
+      "0% average task-time overrun across 20 tasks",
+      "excessive idling in 25 of 27 session(s)",
+      "no recent training on record"
+    ],
+    "sessionsAnalyzed": 27,
+    "tasksAnalyzed": 20
+  },
+  {
+    "operatorId": "OP-07",
+    "score": 29,
+    "status": "CRITICAL",
+    "componentScores": {
+      "safetyCompliance": 0.0,
+      "taskPerformance": 18.7,
+      "machineUseBehavior": 0.0,
+      "trainingStatus": 10
+    },
+    "contributingFactors": [
+      "2 session(s) with seatbelt unfastened",
+      "19% average task-time overrun across 18 tasks",
+      "11 task(s) overran by 15%+",
+      "excessive idling in 21 of 25 session(s)",
+      "training completed recently"
+    ],
+    "sessionsAnalyzed": 25,
+    "tasksAnalyzed": 18
+  },
+  {
+    "operatorId": "OP-08",
+    "score": 23,
+    "status": "CRITICAL",
+    "componentScores": {
+      "safetyCompliance": 0.0,
+      "taskPerformance": 22.6,
+      "machineUseBehavior": 0.0,
+      "trainingStatus": 0.0
+    },
+    "contributingFactors": [
+      "4 session(s) with seatbelt unfastened",
+      "3 session(s) with proximity below 3.0m",
+      "12% average task-time overrun across 19 tasks",
+      "7 task(s) overran by 15%+",
+      "excessive idling in 25 of 32 session(s)",
+      "no recent training on record"
+    ],
+    "sessionsAnalyzed": 32,
+    "tasksAnalyzed": 19
+  },
+  {
+    "operatorId": "OP-09",
+    "score": 50,
+    "status": "NEEDS_ATTENTION",
+    "componentScores": {
+      "safetyCompliance": 32.2,
+      "taskPerformance": 0.0,
+      "machineUseBehavior": 17.4,
+      "trainingStatus": 0.0
+    },
+    "contributingFactors": [
+      "1 session(s) with seatbelt unfastened",
+      "68% average task-time overrun across 12 tasks",
+      "12 task(s) overran by 15%+",
+      "excessive idling in 2 of 23 session(s)",
+      "no recent training on record"
+    ],
+    "sessionsAnalyzed": 23,
+    "tasksAnalyzed": 12
+  },
+  {
+    "operatorId": "OP-10",
+    "score": 57,
+    "status": "NEEDS_ATTENTION",
+    "componentScores": {
+      "safetyCompliance": 29.4,
+      "taskPerformance": 10.6,
+      "machineUseBehavior": 17.4,
+      "trainingStatus": 0.0
+    },
+    "contributingFactors": [
+      "2 session(s) with seatbelt unfastened",
+      "1 session(s) with proximity below 3.0m",
+      "32% average task-time overrun across 16 tasks",
+      "15 task(s) overran by 15%+",
+      "excessive idling in 3 of 34 session(s)",
+      "no recent training on record"
+    ],
+    "sessionsAnalyzed": 34,
+    "tasksAnalyzed": 16
+  },
+  {
+    "operatorId": "OP-11",
+    "score": 61,
+    "status": "NEEDS_ATTENTION",
+    "componentScores": {
+      "safetyCompliance": 27.3,
+      "taskPerformance": 6.5,
+      "machineUseBehavior": 17.3,
+      "trainingStatus": 10
+    },
+    "contributingFactors": [
+      "2 session(s) with seatbelt unfastened",
+      "2 session(s) with proximity below 3.0m",
+      "39% average task-time overrun across 20 tasks",
+      "19 task(s) overran by 15%+",
+      "excessive idling in 3 of 33 session(s)",
+      "training completed recently"
+    ],
+    "sessionsAnalyzed": 33,
+    "tasksAnalyzed": 20
+  },
+  {
+    "operatorId": "OP-12",
+    "score": 56,
+    "status": "NEEDS_ATTENTION",
+    "componentScores": {
+      "safetyCompliance": 12.6,
+      "taskPerformance": 26.5,
+      "machineUseBehavior": 17.4,
+      "trainingStatus": 0.0
+    },
+    "contributingFactors": [
+      "10 session(s) with seatbelt unfastened",
+      "10 session(s) with proximity below 3.0m",
+      "6% average task-time overrun across 15 tasks",
+      "2 task(s) overran by 15%+",
+      "excessive idling in 3 of 35 session(s)",
+      "no recent training on record"
+    ],
+    "sessionsAnalyzed": 35,
+    "tasksAnalyzed": 15
+  },
+  {
+    "operatorId": "OP-13",
+    "score": 72,
+    "status": "GOOD",
+    "componentScores": {
+      "safetyCompliance": 19.1,
+      "taskPerformance": 24.0,
+      "machineUseBehavior": 18.7,
+      "trainingStatus": 10
+    },
+    "contributingFactors": [
+      "4 session(s) with seatbelt unfastened",
+      "5 session(s) with proximity below 3.0m",
+      "10% average task-time overrun across 19 tasks",
+      "4 task(s) overran by 15%+",
+      "excessive idling in 1 of 23 session(s)",
+      "training completed recently"
+    ],
+    "sessionsAnalyzed": 23,
+    "tasksAnalyzed": 19
+  },
+  {
+    "operatorId": "OP-14",
+    "score": 90,
+    "status": "EXCELLENT",
+    "componentScores": {
+      "safetyCompliance": 32.2,
+      "taskPerformance": 29.2,
+      "machineUseBehavior": 18.7,
+      "trainingStatus": 10
+    },
+    "contributingFactors": [
+      "1 session(s) with seatbelt unfastened",
+      "1 session(s) with proximity below 3.0m",
+      "1% average task-time overrun across 16 tasks",
+      "1 task(s) overran by 15%+",
+      "excessive idling in 1 of 23 session(s)",
+      "training completed recently"
+    ],
+    "sessionsAnalyzed": 23,
+    "tasksAnalyzed": 16
+  },
+  {
+    "operatorId": "OP-15",
+    "score": 72,
+    "status": "GOOD",
+    "componentScores": {
+      "safetyCompliance": 32.8,
+      "taskPerformance": 21.1,
+      "machineUseBehavior": 17.6,
+      "trainingStatus": 0.0
+    },
+    "contributingFactors": [
+      "1 session(s) with seatbelt unfastened",
+      "15% average task-time overrun across 17 tasks",
+      "8 task(s) overran by 15%+",
+      "excessive idling in 2 of 25 session(s)",
+      "no recent training on record"
+    ],
+    "sessionsAnalyzed": 25,
+    "tasksAnalyzed": 17
+  }
+]
