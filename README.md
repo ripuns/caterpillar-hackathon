@@ -3,6 +3,24 @@
 
 ---
 
+## 0. Current Build Status (As of Final Review Prep)
+
+**Everything below §0 is the original pre-hackathon plan, kept intact for its design rationale — it does not reflect what's actually built.** For exact endpoint shapes and per-endpoint implementation status, `CONTRACTS.md` is the source of truth; this section is the plain-language summary.
+
+**All 5 core outcomes: implemented.** Task dashboard, safety alerts, behavior flags, training hub, task-time prediction — all live, backed by real (not stubbed) data and logic.
+
+**All 6 differentiator features (§7.1–§7.6): implemented.** Including §7.2's Composite Safety Risk Score — the one ML model considered a stretch/at-risk in the original plan — which is now fully trained and live, not just scaffolded.
+
+**Production hardening (§7.7): fully implemented.** All 9 items in `CONTRACTS.md` §8 (validation, error shape, pagination, caching, circuit breaker, structured logging, versioning, auth, idempotency).
+
+**Frontend: complete**, built by Anamika against the real API (not a mock), covering all core outcomes and differentiators with a custom industrial-HMI-inspired UI (not a generic SaaS dashboard).
+
+**Known, deliberately deferred gap:** no machine in the current synthetic dataset triggers the compound SOS alert (§7.5) — confirmed as a data-realism outcome, not a logic bug (lowest machine health score is 56, threshold is 40). The fix is small and contained to `data-ml/generate_data.py`; not required for the core demo to be honest and complete.
+
+See `CONTRACTS.md`'s Change Log for the full, dated history of what was built, in what order, and by whom.
+
+---
+
 ## 1. Problem Statement (As Assigned)
 
 **Background:** Construction equipment (excavators, loaders) is increasingly digitalized, but tools available to machine operators remain basic. Build an intelligent, end-to-end assistant that supports operators throughout their workday — improving efficiency, safety, and training.
@@ -51,7 +69,7 @@ See [`EXECUTION_PLAN.md`](./EXECUTION_PLAN.md) for the detailed phase-by-phase, 
 
 **Task time estimation → real regression model.** Train on `Task Type, Weather, Operator Skill, Machine Age → Actual Time` (§3.1). A small Python/scikit-learn model (even plain linear regression or a small decision tree) trained on the synthetic dataset, wrapped in one endpoint (`POST /predict-task-time`), called from NestJS. This is the genuine "intelligent" element and the strongest panel talking point — it's real learned prediction, not a hardcoded average.
 
-**Individual safety-rule detection and unusual-behavior detection stay rule-based** (seatbelt, proximity, idling threshold) — deliberate choice, not a shortcut: deterministic per-violation logic is auditable and appropriate for safety-critical features. **Composite safety risk scoring is a second ML model, layered on top of those same rule-detected features** — see §7.2. This is not a contradiction: the inputs to the score are still rule-computed and inspectable; only the *combination* into a single risk number is learned, and it's always shown with its contributing factors so it stays explainable.
+**Individual safety-rule detection and unusual-behavior detection stay rule-based** (seatbelt, proximity, idling threshold) — deliberate choice, not a shortcut: deterministic per-violation logic is auditable and appropriate for safety-critical features. **Composite safety risk scoring is a second ML model, layered on top of those same rule-detected features** — see §7.2 (now implemented, not just planned). This is not a contradiction: the inputs to the score are still rule-computed and inspectable; only the *combination* into a single risk number is learned, and it's always shown with its contributing factors so it stays explainable.
 
 **Optional stretch (only if core is done early):** a thin conversational layer — operator asks "what's my next task?" — as a direct LLM API call from NestJS, grounded in the app's own data. Not required; do not start this before the must-haves are solid.
 
@@ -125,13 +143,15 @@ Re-confirm this list as a team once roles are assigned and the full problem stat
 
 These exist to make the build stand out beyond the baseline 5 outcomes — the panel's stated interest is in ideas that could genuinely solve problems for Caterpillar, not just a completed checklist. Build order below is deliberate: cheapest/lowest-risk first, riskiest (new ML model) after the core is proven stable.
 
-### 7.1 Why-Was-I-Flagged (Alert Transparency)
+### 7.1 Why-Was-I-Flagged (Alert Transparency) — ✅ Implemented
 
 Surface the exact rule and values behind each safety alert in plain language on the frontend, prominently — not buried. The data already exists in `/safety-alerts`' `message` field (`CONTRACTS.md` §2); this is a UI treatment change, not new backend work. Reinforces the "explainable, not black-box" story that's already core to your safety architecture.
 
 **Owner:** Anamika (pure frontend). **Effort:** near-zero — no new endpoint needed.
 
-### 7.2 Composite Safety Risk Score (ML-Based)
+### 7.2 Composite Safety Risk Score (ML-Based) — ✅ Implemented
+
+**Fully trained and live** — `data-ml/train_safety_risk.py`, model at `data-ml/model/safety_risk_model.joblib`, served via `POST /predict-safety-risk` (`CONTRACTS.md` §4.1). `topFactors` computed from the real pipeline's transformed coefficients × feature values, not a placeholder. `riskTier` thresholds tuned against the actual trained score distribution. Verified end-to-end with both high-risk and low-risk test inputs returning sensible, differentiated scores.
 
 A second trained model — logistic regression, chosen specifically for interpretability — outputs a continuous safety risk score (0–1) per session, trained on `operations.csv`'s rule-violation features (seatbelt status, proximity, idling time). **Not a re-encoding of the existing OR-based alert rule** — the model should capture *interactions* between features (e.g., unfastened + high idling together carries disproportionately higher risk than either alone) that a simple OR rule can't express.
 
@@ -141,7 +161,7 @@ Served via a new endpoint, `POST /predict-safety-risk` (see `CONTRACTS.md`) — 
 
 **Owner:** Dev (train/validate model), Ripun (FastAPI wrapper + NestJS integration — same split reasoning as §5.4 for task-time). **Effort:** moderate — reuses an already-built pattern.
 
-### 7.3 Cross-Feature Synthesis
+### 7.3 Cross-Feature Synthesis — ✅ Implemented
 
 Dashboard surfaces correlations across an operator's own history — e.g., "this operator has 3+ safety alerts and consistently overruns estimated task time — may need retraining," with a direct link into the training hub. This is the feature that most literally fulfills "end-to-end intelligent companion": it's the difference between 5 disconnected features and a system that reasons across its own data.
 
@@ -151,7 +171,7 @@ Dashboard surfaces correlations across an operator's own history — e.g., "this
 
 **Backing endpoint:** `GET /operators/:operatorId/summary` — see `CONTRACTS.md` §9.
 
-### 7.4 Machine Health Score
+### 7.4 Machine Health Score — ✅ Implemented
 
 A per-machine composite health score, structurally mirroring the Operator Performance Score (see the data/ML handoff docs): a weighted, explainable, band-classified score (`EXCELLENT`/`GOOD`/`NEEDS_ATTENTION`/`CRITICAL`) computed entirely from fields already present in `operations.csv` — no new data collection required. This completes a symmetry the system is already building: the Operator Score answers "is the *person* the risk factor," this answers "is the *equipment* the risk factor" — together they let the system distinguish an operator problem from a machine problem for the same incident, which is a materially stronger diagnostic story than either alone.
 
@@ -166,7 +186,7 @@ A per-machine composite health score, structurally mirroring the Operator Perfor
 
 **Backing endpoints:** `GET /machines/:machineId/health` (single machine) and `GET /machines` (fleet-wide list) — see `CONTRACTS.md` §11.
 
-### 7.5 Zone-Based Asset Tracker + Compound SOS Alerting
+### 7.5 Zone-Based Asset Tracker + Compound SOS Alerting — ✅ Implemented (known data gap, see §0)
 
 A simulated 2D site map divided into zones (e.g. "Active Work Zone," "Maintenance Bay," "Restricted Zone," "Idle Yard"), each tagged with a danger tier, with each machine's current zone tracked and rendered live. The novelty isn't the map itself — it's the **compound trigger**: a machine's health score degrading *and* the machine being in a zone where that degradation is actually dangerous. A tired machine sitting in the idle yard is a maintenance note; a tired machine in an active excavation zone is an SOS. This is the feature that most visibly demonstrates the system's core thesis — reasoning *across* signals rather than treating them independently — in a single glance: a judge sees a red dot in a restricted zone and immediately understands the system caught something a simple health gauge or a simple map alone would each miss.
 
@@ -187,7 +207,7 @@ A simulated 2D site map divided into zones (e.g. "Active Work Zone," "Maintenanc
 
 **Backing endpoint:** `GET /machines/:machineId/zone-status` (or folded into §7.4's `GET /machines/:machineId/health` response as an additional field — decide at implementation time based on how Anamika wants to consume it) — not yet formally specified in `CONTRACTS.md`, add before building against it.
 
-### 7.6 Cost/ROI Translation + Fleet-Level Rollup
+### 7.6 Cost/ROI Translation + Fleet-Level Rollup — ✅ Implemented
 
 Translates the system's existing detection into a language a fleet manager or the panel actually responds to: cost. Reuses data already being collected — no new instrumentation, purely a computation/aggregation layer on top of what already exists.
 
@@ -204,9 +224,9 @@ Translates the system's existing detection into a language a fleet manager or th
 
 ---
 
-## 7.7 Production Hardening (Post-Differentiators — See `CONTRACTS.md` §8)
+## 7.7 Production Hardening (Post-Differentiators — See `CONTRACTS.md` §8) — ✅ Fully Implemented
 
-Once §7's 6 differentiator features (§7.1–§7.6) are done, if time remains, push the build from "working demo" toward "something that could plausibly run for real" — this is what separates a hackathon checklist from something Caterpillar mentors would actually see as a credible engineering pattern, not just a feature list:
+All 9 items below are done and verified — see `CONTRACTS.md` §8 for per-item implementation detail. This pushed the build from "working demo" toward "something that could plausibly run for real" — this is what separates a hackathon checklist from something Caterpillar mentors would actually see as a credible engineering pattern, not just a feature list:
 
 - **Write endpoints**: `PATCH /tasks/:taskId` (status updates), `POST /incidents` (manual incident logging — this one directly closes a gap against the problem statement's own "incident logging" outcome, which until now only had system-generated alerts, not operator-entered ones).
 - **Input validation** on every write (reject malformed/unknown-enum data with `400` before it reaches business logic).
