@@ -1,0 +1,391 @@
+:root {
+  /* Caterpillar Signature Color Palette (Yellow, Black, Grey, White) */
+  --cat-yellow: #FFCD00;
+  --cat-yellow-hover: #E5B800;
+  --cat-yellow-glow: rgba(255, 205, 0, 0.3);
+  --cat-yellow-light: #FFFBEB;
+  --cat-yellow-border: #FDE68A;
+
+  --cat-black: #111827;
+  --cat-black-pure: #000000;
+  
+  /* Grey Scales */
+  --cat-grey-900: #1f2937;
+  --cat-grey-800: #374151;
+  --cat-grey-700: #4b5563;
+  --cat-grey-600: #6b7280;
+  --cat-grey-500: #9ca3af;
+  --cat-grey-300: #d1d5db;
+  --cat-grey-200: #e5e7eb;
+  --cat-grey-100: #f3f4f6;
+  --cat-grey-50: #f9fafb;
+  --cat-white: #ffffff;
+
+  /* Surfaces & Backgrounds */
+  --cat-bg: #f8fafc;
+  --cat-surface-1: #ffffff;
+  --cat-surface-2: #f1f5f9;
+  --cat-surface-3: #e2e8f0;
+  --cat-border: #e2e8f0;
+  --cat-border-hover: #cbd5e1;
+  --cat-border-dark: #374151;
+  
+  /* Text */
+  --cat-text-main: #0f172a;
+  --cat-text-muted: #475569;
+  --cat-text-dim: #64748b;
+
+  /* Safety & Status Colors */
+  --cat-danger: #dc2626;
+  --cat-danger-surface: #fef2f2;
+  --cat-danger-border: #fecaca;
+  --cat-warning: #d97706;
+  --cat-warning-surface: #fffbeb;
+  --cat-warning-border: #fde68a;
+  --cat-success: #16a34a;
+  --cat-success-surface: #f0fdf4;
+  --cat-success-border: #bbf7d0;
+  --cat-info: #0284c7;
+  --cat-info-surface: #f0f9ff;
+  --cat-info-border: #bae6fd;
+
+  --font-hud: 'Rajdhani', sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-yellow: 0 2px 8px rgba(255, 205, 0, 0.35);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--cat-bg);
+  color: var(--cat-text-main);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Crisp White / Grid Canvas Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(255, 205, 0, 0.08) 0%, transparent 50%),
+    linear-gradient(to right, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Typography Helpers */
+h1, h2, h3, h4, .hud-title {
+  font-family: var(--font-hud);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--cat-black);
+}
+
+.mono-val {
+  font-family: var(--font-mono);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cat-grey-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--cat-grey-300);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cat-yellow);
+}
+
+/* Common Layout Components */
+.app-container {
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 20px 24px 40px;
+  width: 100%;
+}
+
+/* Card Styles */
+.cat-card {
+  background: var(--cat-white);
+  border: 1px solid var(--cat-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cat-card:hover {
+  border-color: var(--cat-border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.cat-card-elevated {
+  background: var(--cat-grey-50);
+  border: 1px solid var(--cat-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.cat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--cat-grey-200);
+}
+
+.cat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.15rem;
+  color: var(--cat-black);
+}
+
+/* Button System */
+.cat-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-hud);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+}
+
+.cat-btn-primary {
+  background: var(--cat-yellow);
+  color: #000;
+  font-weight: 800;
+  border: 1px solid #eab308;
+  box-shadow: var(--shadow-yellow);
+}
+.cat-btn-primary:hover {
+  background: var(--cat-yellow-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 205, 0, 0.45);
+}
+.cat-btn-primary:active {
+  transform: translateY(0);
+}
+
+.cat-btn-secondary {
+  background: var(--cat-white);
+  color: var(--cat-grey-800);
+  border: 1px solid var(--cat-grey-300);
+}
+.cat-btn-secondary:hover {
+  background: var(--cat-grey-100);
+  border-color: var(--cat-black);
+  color: #000;
+}
+
+.cat-btn-danger {
+  background: var(--cat-danger-surface);
+  color: var(--cat-danger);
+  border: 1px solid var(--cat-danger-border);
+}
+.cat-btn-danger:hover {
+  background: var(--cat-danger);
+  color: #fff;
+  border-color: var(--cat-danger);
+}
+
+.cat-btn-success {
+  background: var(--cat-success-surface);
+  color: var(--cat-success);
+  border: 1px solid var(--cat-success-border);
+}
+.cat-btn-success:hover {
+  background: var(--cat-success);
+  color: #fff;
+}
+
+.cat-btn-sm {
+  padding: 5px 12px;
+  font-size: 0.82rem;
+}
+
+/* Badges & Status Chips */
+.cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-hud);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.cat-badge-yellow {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.cat-badge-red {
+  background: var(--cat-danger-surface);
+  color: var(--cat-danger);
+  border: 1px solid var(--cat-danger-border);
+}
+
+.cat-badge-amber {
+  background: var(--cat-warning-surface);
+  color: var(--cat-warning);
+  border: 1px solid var(--cat-warning-border);
+}
+
+.cat-badge-green {
+  background: var(--cat-success-surface);
+  color: var(--cat-success);
+  border: 1px solid var(--cat-success-border);
+}
+
+.cat-badge-cyan {
+  background: var(--cat-info-surface);
+  color: var(--cat-info);
+  border: 1px solid var(--cat-info-border);
+}
+
+.cat-badge-muted {
+  background: var(--cat-grey-100);
+  color: var(--cat-grey-700);
+  border: 1px solid var(--cat-grey-300);
+}
+
+/* Pulse Animations for Critical Events */
+@keyframes pulse-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+.pulse-critical {
+  animation: pulse-red 1.8s infinite;
+}
+
+@keyframes sweep-radar {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-sweep {
+  transform-origin: center;
+  animation: sweep-radar 4s linear infinite;
+}
+
+/* Toast Notifications Container */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  max-width: 380px;
+  pointer-events: none;
+}
+
+.toast-card {
+  pointer-events: auto;
+  background: var(--cat-white);
+  border: 1px solid var(--cat-border);
+  border-left: 4px solid var(--cat-yellow);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: slide-in 0.2s ease-out;
+}
+
+.toast-card.error {
+  border-left-color: var(--cat-danger);
+  background: #fff5f5;
+}
+
+.toast-card.warning {
+  border-left-color: var(--cat-warning);
+  background: #fffbf0;
+}
+
+.toast-card.success {
+  border-left-color: var(--cat-success);
+  background: #f0fdf4;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
