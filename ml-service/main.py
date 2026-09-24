@@ -123,9 +123,9 @@ def predict_task_time(req: PredictTaskTimeRequest):
 
 
 def _risk_tier(risk_score: float) -> str:
-    if risk_score > 0.6:
+    if risk_score > 0.5532:
         return "high"
-    if risk_score >= 0.3:
+    if risk_score >= 0.2565:
         return "medium"
     return "low"
 
@@ -133,33 +133,18 @@ def _risk_tier(risk_score: float) -> str:
 @app.post("/predict-safety-risk")
 def predict_safety_risk(req: PredictSafetyRiskRequest):
     """
-    CONTRACTS.md §4.1 — Composite Safety Risk Score.
+    Composite Safety Risk Score.
 
-    SCAFFOLD ONLY until Dev hands off safety_risk_model.joblib. Expected
-    model shape (for Dev, so the block below "just works" once the file
-    exists — no NestJS/FastAPI code changes should be needed):
+    Uses the trained safety_risk_model.joblib pipeline.
 
-      - A fitted scikit-learn Pipeline/LogisticRegression, saved via
-        joblib.dump(), same pattern as task_time_pipeline.joblib.
-      - .predict_proba(X)[0][1] gives the positive-class (risky) probability.
-      - Input frame columns, in this exact order/name, matching the
-        request fields 1:1 so no remapping is needed here:
-          seatbelt_status (str, "Fastened"/"Unfastened"),
-          distance_to_nearest_object_m (float),
-          idling_time_min (float)
-      - If seatbelt_status needs encoding (e.g. one-hot/label), do it
-        INSIDE the pipeline (like task_time_pipeline.joblib does for its
-        categorical columns) so this route doesn't need to know about it.
-      - For topFactors: if using plain LogisticRegression (not inside a
-        ColumnTransformer that obscures raw coefficients), expose
-        `.coef_[0]` and multiply each by its corresponding input value.
-        If the pipeline has preprocessing that makes raw coefficients not
-        map 1:1 to these three input fields, Dev should instead have the
-        model produce topFactors directly (e.g. via a small wrapper) and
-        this route can return that unchanged. Flag whichever approach is
-        used when handing off, so this comment can be updated to match.
+    The model predicts the probability of a safety incident occurring
+    in the operator's next chronological operation.
+
+    topFactors are calculated from the transformed Logistic Regression
+    feature contributions and mapped back to the three API-level factors.
     """
     model = _load_risk_model()
+
     if model is None:
         return {
             "riskScore": None,
@@ -178,16 +163,61 @@ def predict_safety_risk(req: PredictSafetyRiskRequest):
                 }
             ]
         )
+
+        # Predict positive-class probability = future safety risk.
         risk_score = float(model.predict_proba(X)[0][1])
 
-        # TODO(Dev): replace with real coefficient x input-value contributions
-        # once the model's preprocessing shape is confirmed (see docstring
-        # above). Placeholder keeps the response shape §4.1-correct in the
-        # meantime so NestJS/frontend can integrate against it now.
+        # Get preprocessing + classifier from the trained Pipeline.
+        preprocessor = model.named_steps["preprocessor"]
+        classifier = model.named_steps["classifier"]
+
+        # Transform the input exactly as the model sees it.
+        transformed_X = preprocessor.transform(X)
+
+        # Logistic Regression coefficients.
+        coefficients = classifier.coef_[0]
+
+        # Contribution = coefficient * transformed feature value.
+        transformed_values = transformed_X.toarray()[0] if hasattr(
+            transformed_X, "toarray"
+        ) else transformed_X[0]
+
+        contributions = coefficients * transformed_values
+
+        # Get transformed feature names.
+        feature_names = preprocessor.get_feature_names_out()
+
+        factor_contributions = {
+            "seatbeltStatus": 0.0,
+            "distanceToNearestObjectM": 0.0,
+            "idlingTimeMin": 0.0,
+        }
+
+        for feature_name, contribution in zip(
+            feature_names, contributions
+        ):
+            contribution = float(contribution)
+
+            if "seatbelt_status" in feature_name:
+                factor_contributions["seatbeltStatus"] += contribution
+
+            elif "distance_to_nearest_object_m" in feature_name:
+                factor_contributions["distanceToNearestObjectM"] += contribution
+
+            elif "idling_time_min" in feature_name:
+                factor_contributions["idlingTimeMin"] += contribution
+
+        # Sort by contribution magnitude so the strongest factors appear first.
         top_factors = [
-            {"factor": "seatbeltStatus", "contribution": None},
-            {"factor": "distanceToNearestObjectM", "contribution": None},
-            {"factor": "idlingTimeMin", "contribution": None},
+            {
+                "factor": factor,
+                "contribution": round(contribution, 4),
+            }
+            for factor, contribution in sorted(
+                factor_contributions.items(),
+                key=lambda item: abs(item[1]),
+                reverse=True,
+            )
         ]
 
         return {
@@ -196,6 +226,7 @@ def predict_safety_risk(req: PredictSafetyRiskRequest):
             "topFactors": top_factors,
             "source": "model",
         }
+
     except Exception:
         return {
             "riskScore": None,
