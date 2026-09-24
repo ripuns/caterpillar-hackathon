@@ -1,0 +1,35 @@
+{
+  "target": "next chronological safety incident for same operator",
+  "features": [
+    "seatbelt_status",
+    "distance_to_nearest_object_m",
+    "idling_time_min"
+  ],
+  "seed": 42,
+  "rows_original": 423,
+  "rows_used": 408,
+  "positive_rate": 0.2916666666666667,
+  "roc_auc": 0.9116,
+  "accuracy": 0.8537,
+  "thresholds": {
+    "low_medium": 0.2565,
+    "medium_high": 0.5532
+  },
+  "score_distribution": {
+    "min": 0.0678,
+    "p25": 0.135,
+    "median": 0.2125,
+    "p75": 0.408,
+    "max": 0.92
+  },
+  "confusion_matrix": [
+    [
+      56,
+      2
+    ],
+    [
+      10,
+      14
+    ]
+  ]
+}

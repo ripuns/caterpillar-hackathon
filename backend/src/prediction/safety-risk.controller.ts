@@ -3,7 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, catchError, timeout } from 'rxjs';
 import { MlServiceHealthService } from '../health/ml-service-health.service';
 
-const ML_SERVICE_URL = 'http://localhost:8001/predict-safety-risk';
+const ML_SERVICE_URL = 'http://localhost:8000/predict-safety-risk';
 const REQUEST_TIMEOUT_MS = 2000;
 
 interface PredictSafetyRiskRequest {
