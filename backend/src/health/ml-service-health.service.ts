@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, catchError, timeout, of } from 'rxjs';
 
-const ML_SERVICE_HEALTH_URL = 'http://localhost:8000/health';
+const ML_SERVICE_HEALTH_URL = 'http://localhost:8001/health';
 const HEALTH_CHECK_TIMEOUT_MS = 1000;
 const REFRESH_INTERVAL_MS = 10_000;
 
