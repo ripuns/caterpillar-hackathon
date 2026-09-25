@@ -7,6 +7,7 @@ import {
   getBehaviorFlags,
   getTrainingModules,
   checkBackendStatus,
+  getFleetCostSummary,
 } from '../services/api';
 import {
   INITIAL_OPERATOR,
@@ -34,6 +35,9 @@ export function OperatorProvider({ children }) {
   const [safetyAlerts, setSafetyAlerts] = useState([]);
   const [behaviorFlags, setBehaviorFlags] = useState([]);
   const [trainingModules, setTrainingModules] = useState([]);
+
+  // Fleet Cost/ROI Rollup (§14)
+  const [fleetCostSummary, setFleetCostSummary] = useState(null);
 
   // Telemetry & Live Sensor Feeds
   const [telemetry, setTelemetry] = useState({
@@ -74,12 +78,13 @@ export function OperatorProvider({ children }) {
   const refreshAll = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [backendLive, taskRes, alertRes, flagRes, trainingRes] = await Promise.all([
+      const [backendLive, taskRes, alertRes, flagRes, trainingRes, costRes] = await Promise.all([
         checkBackendStatus(),
         getTasks(),
         getSafetyAlerts(),
         getBehaviorFlags(),
         getTrainingModules(),
+        getFleetCostSummary(),
       ]);
 
       setIsBackendLive(backendLive);
@@ -87,6 +92,7 @@ export function OperatorProvider({ children }) {
       setSafetyAlerts(alertRes.data || []);
       setBehaviorFlags(flagRes.data || []);
       setTrainingModules(trainingRes.data || []);
+      setFleetCostSummary(costRes.data || null);
       setLastSyncTime(new Date());
     } catch (err) {
       console.error('[Context] Failed to load initial data:', err);
@@ -317,6 +323,7 @@ export function OperatorProvider({ children }) {
         behaviorFlags,
         trainingModules,
         toggleModuleComplete,
+        fleetCostSummary,
         telemetry,
         telemetryHistory,
         isBackendLive,

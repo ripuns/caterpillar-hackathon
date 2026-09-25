@@ -21,6 +21,7 @@ import {
   HardHat,
   ChevronRight,
   Zap,
+  DollarSign,
 } from 'lucide-react';
 
 export default function CockpitDashboard() {
@@ -34,6 +35,7 @@ export default function CockpitDashboard() {
     telemetry,
     setActiveTab,
     setIsDemoDrawerOpen,
+    fleetCostSummary,
   } = useOperator();
 
   const activeTask = tasks.find((t) => t.status === 'in_progress') || tasks.find((t) => t.status === 'pending');
@@ -105,6 +107,40 @@ export default function CockpitDashboard() {
           </div>
         </div>
       </section>
+
+      {/* Fleet Cost/ROI Rollup (§14) */}
+      {fleetCostSummary && (
+        <section className="cost-roi-stat-row">
+          <div className="cost-roi-stat-tile">
+            <DollarSign size={16} className="text-yellow-dark" />
+            <div className="hud-meter-body">
+              <span className="hud-meter-label">IDLE COST (EST.)</span>
+              <span className="hud-meter-value mono-val">${fleetCostSummary.totalIdleCostEstimate?.toLocaleString()}</span>
+            </div>
+          </div>
+          <div className="cost-roi-stat-tile">
+            <DollarSign size={16} className="text-yellow-dark" />
+            <div className="hud-meter-body">
+              <span className="hud-meter-label">OVERRUN COST (EST.)</span>
+              <span className="hud-meter-value mono-val">${fleetCostSummary.totalOverrunCostEstimate?.toLocaleString()}</span>
+            </div>
+          </div>
+          <div className="cost-roi-stat-tile">
+            <DollarSign size={16} className="text-yellow-dark" />
+            <div className="hud-meter-body">
+              <span className="hud-meter-label">INCIDENT COST (EST.)</span>
+              <span className="hud-meter-value mono-val">${fleetCostSummary.totalIncidentCostEstimate?.toLocaleString()}</span>
+            </div>
+          </div>
+          <div className="cost-roi-stat-tile">
+            <ShieldAlert size={16} className="text-yellow-dark" />
+            <div className="hud-meter-body">
+              <span className="hud-meter-label">TOTAL INCIDENTS</span>
+              <span className="hud-meter-value mono-val">{fleetCostSummary.totalIncidentCount}</span>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 2. Core Operational Cockpit Matrix (3 Sleek Fluid Columns) */}
       <section className="cockpit-matrix-grid">
